@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/
+
+# Archives
+archives/
+
+# Logs
+logs/
+*.log
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# Build outputs
+frontend/dist/
+backend/dist/
+*.egg-info/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
