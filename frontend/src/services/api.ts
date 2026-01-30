@@ -6,7 +6,6 @@ import axios from 'axios'
 import type {
   Article,
   Source,
-  FetchRequest,
   FetchResponse,
   AnalyzeRequest,
   AnalyzeResponse,
@@ -27,7 +26,7 @@ const client = axios.create({
 
 export const api = {
   // 爬取相关
-  fetch: async (request: FetchRequest): Promise<FetchResponse> => {
+  fetch: async (request: { industry: string; hours: number; source_ids?: string[] }): Promise<FetchResponse> => {
     const { data } = await client.post('/api/fetch', request)
     return data
   },
@@ -79,10 +78,9 @@ export const api = {
     await client.post(`/api/articles/${id}/archive`)
   },
 
-  exportArticles: async (articleIds: string[], outputDir?: string): Promise<any> => {
+  exportArticles: async (articleIds: string[]): Promise<any> => {
     const { data } = await client.post('/api/articles/export', {
       article_ids: articleIds,
-      output_dir: outputDir,
     })
     return data
   },
@@ -101,6 +99,11 @@ export const api = {
     return data
   },
 
+  addSource: async (source: any): Promise<Source> => {
+    const { data } = await client.post('/api/config/sources', source)
+    return data
+  },
+
   updateSource: async (id: string, source: Source): Promise<Source> => {
     const { data } = await client.put(`/api/config/sources/${id}`, source)
     return data
@@ -115,10 +118,33 @@ export const api = {
     return data
   },
 
+  // API Key 管理
+  getAPIKeys: async (): Promise<any> => {
+    const { data } = await client.get('/api/config/api-keys')
+    return data
+  },
+
+  setAPIKey: async (backend: string, apiKey: string): Promise<any> => {
+    const { data } = await client.post('/api/config/api-keys', {
+      backend,
+      api_key: apiKey
+    })
+    return data
+  },
+
+  deleteAPIKey: async (backend: string): Promise<any> => {
+    const { data } = await client.delete(`/api/config/api-keys/${backend}`)
+    return data
+  },
+
   // 分析结果相关（需要在后端添加对应路由）
   getAnalysis: async (id: string): Promise<Analysis> => {
-    // 这个路由后端还没实现，需要添加
     const { data } = await client.get(`/api/analyses/${id}`)
+    return data
+  },
+
+  getAnalysesList: async (): Promise<Analysis[]> => {
+    const { data } = await client.get('/api/analyses')
     return data
   },
 }

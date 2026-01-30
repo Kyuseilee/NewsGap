@@ -12,12 +12,38 @@ from typing import List
 from models import Article
 
 
-class ArchiveManager:
-    """归档管理器"""
+class ArchiveService:
+    """归档服务"""
     
     def __init__(self, base_dir: str = "./archives"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
+    
+    async def save_article(self, article: Article) -> Path:
+        """
+        保存单篇文章到归档
+        
+        Returns:
+            文件路径
+        """
+        # 使用当前日期作为归档批次
+        batch_date = datetime.now().strftime("%Y-%m-%d")
+        batch_dir = self.base_dir / batch_date
+        
+        # 按行业分类
+        industry_dir = batch_dir / article.industry.value
+        industry_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 生成文件名
+        safe_title = self._sanitize_filename(article.title)
+        file_name = f"{safe_title[:100]}.md"
+        file_path = industry_dir / file_name
+        
+        # 写入 Markdown
+        content = self._generate_markdown(article)
+        await asyncio.to_thread(file_path.write_text, content, encoding='utf-8')
+        
+        return file_path
     
     async def export_articles(self, articles: List[Article]) -> str:
         """

@@ -6,12 +6,15 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
+import asyncio
+import logging
 
 from models import FetchRequest, FetchResponse, IndustryCategory
 from storage.database import Database
 from crawler.service import CrawlerService
 
 router = APIRouter(prefix="/api/fetch", tags=["fetch"])
+logger = logging.getLogger(__name__)
 
 
 async def get_db():
@@ -56,32 +59,73 @@ async def fetch_articles(
             detail=f"未找到行业 '{request.industry}' 的可用信息源"
         )
     
-    # 从每个源爬取
-    article_ids = []
-    source_names = []
-    
-    for source in sources:
+    # 并发爬取所有源
+    async def fetch_from_source(source):
+        """从单个源爬取"""
         try:
+            logger.info(f"开始爬取: {source.name}")
             articles = await crawler.fetch(source, hours=request.hours)
             
             # 保存文章
+            article_ids = []
             for article in articles:
                 article_id = await db.save_article(article)
                 article_ids.append(article_id)
-            
-            source_names.append(source.name)
             
             # 更新源的最后爬取时间
             from datetime import datetime
             source.last_fetched_at = datetime.now()
             await db.save_source(source)
+            
+            logger.info(f"✓ {source.name}: 爬取 {len(articles)} 篇文章")
+            return {
+                'success': True,
+                'source_name': source.name,
+                'article_ids': article_ids
+            }
         
         except Exception as e:
             # 单个源失败不影响整体
-            print(f"从源 {source.name} 爬取失败: {str(e)}")
-            continue
+            logger.error(f"✗ {source.name}: {str(e)}")
+            return {
+                'success': False,
+                'source_name': source.name,
+                'error': str(e)
+            }
+    
+    # 并发执行所有爬取任务，设置超时
+    try:
+        results = await asyncio.gather(
+            *[fetch_from_source(source) for source in sources],
+            return_exceptions=False
+        )
+    except Exception as e:
+        logger.error(f"批量爬取出错: {str(e)}")
+        results = []
+    
+    # 汇总结果
+    article_ids = []
+    source_names = []
+    failed_sources = []
+    
+    for result in results:
+        if isinstance(result, dict):
+            if result.get('success'):
+                article_ids.extend(result.get('article_ids', []))
+                source_names.append(result.get('source_name'))
+            else:
+                failed_sources.append({
+                    'source': result.get('source_name'),
+                    'error': result.get('error')
+                })
     
     fetch_time = time.time() - start_time
+    
+    # 记录失败的源
+    if failed_sources:
+        logger.warning(f"失败的源 ({len(failed_sources)}): {failed_sources}")
+    
+    logger.info(f"爬取完成: {len(article_ids)} 篇文章, 耗时 {fetch_time:.2f}秒")
     
     return FetchResponse(
         article_ids=article_ids,

@@ -29,6 +29,10 @@ class Database(StorageInterface):
         """确保数据库目录存在"""
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
     
+    def _get_connection(self):
+        """获取数据库连接（用于上下文管理）"""
+        return aiosqlite.connect(self.db_path)
+    
     async def initialize(self):
         """初始化数据库（创建表）"""
         # 使用绝对路径定位 schema.sql
@@ -262,6 +266,16 @@ class Database(StorageInterface):
             
             return self._row_to_source(row)
     
+    async def delete_source(self, source_id: str) -> bool:
+        """删除信息源"""
+        async with aiosqlite.connect(self.db_path) as db:
+            cursor = await db.execute(
+                "DELETE FROM sources WHERE id = ?",
+                (source_id,)
+            )
+            await db.commit()
+            return cursor.rowcount > 0
+    
     async def get_sources(
         self,
         industry: Optional[IndustryCategory] = None,
@@ -302,15 +316,16 @@ class Database(StorageInterface):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
                 INSERT OR REPLACE INTO analyses (
-                    id, analysis_type, executive_brief,
+                    id, analysis_type, executive_brief, markdown_report,
                     trends, signals, information_gaps,
                     llm_backend, llm_model, token_usage, estimated_cost,
                     created_at, processing_time_seconds,
                     user_rating, user_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 analysis.id, analysis.analysis_type.value,
                 analysis.executive_brief,
+                analysis.markdown_report,  # 添加 markdown_report
                 json.dumps([t.model_dump() for t in analysis.trends]),
                 json.dumps([s.model_dump() for s in analysis.signals]),
                 json.dumps([g.model_dump() for g in analysis.information_gaps]),
@@ -425,6 +440,7 @@ class Database(StorageInterface):
             analysis_type=AnalysisType(row['analysis_type']),
             article_ids=article_ids,
             executive_brief=row['executive_brief'],
+            markdown_report=row['markdown_report'] if row['markdown_report'] else None,
             trends=[Trend(**t) for t in json.loads(row['trends'])] if row['trends'] else [],
             signals=[Signal(**s) for s in json.loads(row['signals'])] if row['signals'] else [],
             information_gaps=[InformationGap(**g) for g in json.loads(row['information_gaps'])] if row['information_gaps'] else [],

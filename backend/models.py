@@ -21,16 +21,28 @@ class SourceType(str, Enum):
     API = "api"
 
 
+class SourcePriority(str, Enum):
+    """信息源优先级"""
+    OFFICIAL_RSS = "official_rss"      # 官方RSS，最稳定
+    RSSHUB_STABLE = "rsshub_stable"    # RSSHub稳定路由
+    RSSHUB_HIGH_RISK = "rsshub_high_risk"  # RSSHub高风险路由（国内媒体等）
+    CUSTOM_CRAWLER = "custom_crawler"  # 自定义爬虫
+
+
 class IndustryCategory(str, Enum):
-    """行业分类"""
-    AI = "ai"
-    TECH = "tech"
-    FINANCE = "finance"
-    HEALTHCARE = "healthcare"
-    ENERGY = "energy"
-    EDUCATION = "education"
-    ENTERTAINMENT = "entertainment"
-    OTHER = "other"
+    """行业分类 - 基于RSSHub路由体系"""
+    SOCIAL = "social"           # 社交媒体：微博、知乎、即刻、豆瓣等
+    NEWS = "news"               # 新闻资讯：传统媒体、新闻网站
+    TECH = "tech"               # 科技互联网：36氪、少数派、IT之家等
+    DEVELOPER = "developer"     # 开发者：GitHub、Hacker News、掘金等
+    FINANCE = "finance"         # 财经金融：华尔街见闻、东方财富等
+    ENTERTAINMENT = "entertainment"  # 娱乐影视：豆瓣电影、B站等
+    GAMING = "gaming"           # 游戏电竞：Steam、TapTap等
+    ANIME = "anime"             # 动漫二次元：Bangumi、ACG资讯
+    SHOPPING = "shopping"       # 电商购物：淘宝、京东、小红书
+    EDUCATION = "education"     # 学习教育：MOOC、知识付费
+    LIFESTYLE = "lifestyle"     # 生活方式：美食、旅游、健身
+    OTHER = "other"             # 其他
 
 
 class AnalysisType(str, Enum):
@@ -60,10 +72,13 @@ class Source(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     url: str = Field(..., min_length=1)
     source_type: SourceType = SourceType.RSS
+    priority: SourcePriority = SourcePriority.RSSHUB_STABLE  # 新增优先级
     industry: IndustryCategory = IndustryCategory.OTHER
     enabled: bool = True
     fetch_interval_hours: int = Field(default=24, ge=1, le=168)  # 1-168小时
     last_fetched_at: Optional[datetime] = None
+    last_error: Optional[str] = None  # 新增：最后错误信息
+    error_count: int = Field(default=0, ge=0)  # 新增：连续错误次数
     created_at: datetime = Field(default_factory=datetime.now)
     metadata: Optional[dict] = None  # 额外的源特定配置
     
@@ -146,6 +161,7 @@ class Analysis(BaseModel):
     
     # 分析结果
     executive_brief: str  # 执行摘要（总是生成）
+    markdown_report: Optional[str] = None  # 完整的Markdown格式报告
     trends: List[Trend] = Field(default_factory=list)
     signals: List[Signal] = Field(default_factory=list)
     information_gaps: List[InformationGap] = Field(default_factory=list)
@@ -321,7 +337,8 @@ class AnalyzeRequest(BaseModel):
     """分析请求"""
     article_ids: List[str] = Field(..., min_items=1)
     analysis_type: AnalysisType = AnalysisType.COMPREHENSIVE
-    llm_backend: str = "deepseek"  # "ollama", "openai", "deepseek", "gemini"
+    llm_backend: str = "gemini"  # "ollama", "openai", "deepseek", "gemini"
+    llm_model: Optional[str] = None
     custom_prompt: Optional[str] = None
 
 
@@ -335,7 +352,8 @@ class IntelligenceRequest(BaseModel):
     """一键情报请求"""
     industry: IndustryCategory
     hours: int = Field(default=24, ge=1, le=168)
-    llm_backend: str = "deepseek"
+    llm_backend: str = "gemini"
+    llm_model: Optional[str] = None
     source_ids: Optional[List[str]] = None
 
 

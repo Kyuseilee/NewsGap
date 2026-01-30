@@ -4,12 +4,14 @@
 处理文章查询和管理
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from typing import List, Optional
 from datetime import datetime
+from pathlib import Path
 
 from models import Article, ArticleListResponse, IndustryCategory
 from storage.database import Database
+from storage.archive import ArchiveService
 
 router = APIRouter(prefix="/api/articles", tags=["articles"])
 
@@ -120,20 +122,45 @@ async def archive_article(
 
 @router.post("/export")
 async def export_articles(
-    article_ids: List[str],
-    output_dir: str = "./archives",
+    article_ids: List[str] = Body(..., embed=True),
     db: Database = Depends(get_db)
 ):
     """
-    导出文章为 Markdown 归档
+    批量导出文章为 Markdown 归档
     """
+    if not article_ids:
+        raise HTTPException(status_code=400, detail="请提供至少一个文章ID")
+    
     try:
-        archive_path = await db.archive_to_markdown(article_ids, output_dir)
+        # 获取文章
+        articles = []
+        for aid in article_ids:
+            article = await db.get_article(aid)
+            if article:
+                articles.append(article)
+        
+        if not articles:
+            raise HTTPException(status_code=404, detail="未找到任何文章")
+        
+        # 创建归档服务
+        archive_service = ArchiveService()
+        
+        # 归档文章
+        output_paths = []
+        for article in articles:
+            path = await archive_service.save_article(article)
+            output_paths.append(str(path))
+            
+            # 标记为已归档
+            article.archived = True
+            article.archived_at = datetime.now()
+            await db.save_article(article)
         
         return {
             'success': True,
-            'archive_path': archive_path,
-            'count': len(article_ids)
+            'output_path': str(Path(output_paths[0]).parent) if output_paths else "./archives",
+            'count': len(articles),
+            'files': output_paths
         }
     
     except Exception as e:

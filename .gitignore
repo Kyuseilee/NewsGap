@@ -30,6 +30,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+.env.rsshub
 
 # Database
 *.db

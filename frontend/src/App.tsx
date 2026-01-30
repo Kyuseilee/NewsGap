@@ -3,6 +3,7 @@ import { Home, FileText, TrendingUp, Archive, Settings } from 'lucide-react'
 import HomePage from './pages/Home'
 import ArticlesPage from './pages/Articles'
 import AnalysisPage from './pages/Analysis'
+import AnalysisList from './pages/AnalysisList'
 import ArchivePage from './pages/Archive'
 import SettingsPage from './pages/Settings'
 
@@ -36,7 +37,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/articles" element={<ArticlesPage />} />
-          <Route path="/analysis" element={<AnalysisPage />} />
+          <Route path="/analysis" element={<AnalysisList />} />
+          <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>

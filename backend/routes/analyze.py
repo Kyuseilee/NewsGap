@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from models import AnalyzeRequest, AnalyzeResponse
 from storage.database import Database
 from analyzer import Analyzer
+from config_manager import ConfigManager
 
 router = APIRouter(prefix="/api/analyze", tags=["analyze"])
 
@@ -20,10 +21,17 @@ async def get_db():
     return db
 
 
+async def get_config_manager(db: Database = Depends(get_db)):
+    """依赖注入：配置管理器"""
+    from config_manager import ConfigManager
+    return ConfigManager(db)
+
+
 @router.post("", response_model=AnalyzeResponse)
 async def analyze_articles(
     request: AnalyzeRequest,
-    db: Database = Depends(get_db)
+    db: Database = Depends(get_db),
+    config_mgr: ConfigManager = Depends(get_config_manager)
 ):
     """
     分析文章
@@ -43,12 +51,21 @@ async def analyze_articles(
             detail="未找到任何指定的文章"
         )
     
+    # 获取 API Key（优先使用数据库中的配置）
+    api_key = await config_mgr.get_api_key(request.llm_backend)
+    
+    # 检查是否需要 API Key
+    if request.llm_backend != 'ollama' and not api_key:
+        raise HTTPException(
+            status_code=400,
+            detail=f"使用 {request.llm_backend.upper()} 需要先在设置页面配置 API Key"
+        )
+    
     # 创建分析器
-    # TODO: 从配置中获取 API Key
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
-        api_key=None,  # 需要从环境变量或配置文件读取
-        model=None
+        api_key=api_key,
+        model=request.llm_model  # 传递用户选择的模型
     )
     
     # 执行分析
@@ -78,7 +95,8 @@ async def analyze_articles(
 @router.post("/estimate-cost")
 async def estimate_analysis_cost(
     request: AnalyzeRequest,
-    db: Database = Depends(get_db)
+    db: Database = Depends(get_db),
+    config_mgr: ConfigManager = Depends(get_config_manager)
 ):
     """
     估算分析成本
@@ -98,11 +116,14 @@ async def estimate_analysis_cost(
             detail="未找到任何指定的文章"
         )
     
+    # 获取 API Key
+    api_key = await config_mgr.get_api_key(request.llm_backend)
+    
     # 创建分析器并估算
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
-        api_key=None,
-        model=None
+        api_key=api_key,
+        model=request.llm_model
     )
     
     cost_estimate = analyzer.estimate_cost(articles)

@@ -34,3 +34,15 @@ crawler:
   timeout_seconds: 30
   max_retries: 3
   user_agent: "NewsGap/0.1.0 (Information Intelligence Tool)"
+  verify_ssl: false  # 是否验证 SSL 证书（避免 rsshub.app 证书问题）
+
+# RSSHub 配置
+rsshub:
+  # 本地 RSSHub 实例
+  custom_instance: "http://localhost:1200"
+  
+  # 备用公共实例（选择稳定性较好的）
+  public_instances:
+    - https://rsshub.app
+    - https://rsshub.pseudoyu.com
+

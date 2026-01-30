@@ -64,6 +64,7 @@ export interface Analysis {
   analysis_type: string
   article_ids: string[]
   executive_brief: string
+  markdown_report?: string
   trends: Trend[]
   signals: Signal[]
   information_gaps: InformationGap[]
@@ -94,6 +95,7 @@ export interface AnalyzeRequest {
   article_ids: string[]
   analysis_type: string
   llm_backend: string
+  llm_model?: string
   custom_prompt?: string
 }
 
@@ -106,6 +108,7 @@ export interface IntelligenceRequest {
   industry: string
   hours: number
   llm_backend: string
+  llm_model?: string
   source_ids?: string[]
 }
 

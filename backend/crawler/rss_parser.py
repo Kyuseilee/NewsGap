@@ -8,6 +8,9 @@ import feedparser
 from datetime import datetime, timedelta
 from typing import List, Optional
 from dateutil import parser as date_parser
+import yaml
+import os
+from pathlib import Path
 
 from models import Article, Source, IndustryCategory
 from crawler.fetcher import Fetcher
@@ -17,7 +20,17 @@ class RSSParser:
     """RSS/Atom feed 解析器"""
     
     def __init__(self):
-        self.fetcher = Fetcher()
+        # 加载配置文件以获取 RSSHub 备用实例
+        config_path = Path(__file__).parent.parent / "config.yaml"
+        rsshub_fallback = []
+        
+        if config_path.exists():
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                rsshub_config = config.get('rsshub', {})
+                rsshub_fallback = rsshub_config.get('public_instances', [])
+        
+        self.fetcher = Fetcher(rsshub_fallback_instances=rsshub_fallback)
     
     async def parse(
         self,
