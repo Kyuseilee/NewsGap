@@ -1,10 +1,15 @@
 import { useState, useMemo } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { Play, Zap, Loader2 } from 'lucide-react'
 import { api } from '@/services/api'
 import type { IntelligenceRequest, Source } from '@/types/api'
 
 export default function HomePage() {
+  // 路由导航和query管理
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  
   // 选择的行业分类（基于RSSHub分类）
   const [industry, setIndustry] = useState('tech')
   const [hours, setHours] = useState(24)
@@ -43,6 +48,9 @@ export default function HomePage() {
       api.fetch(data),
     onSuccess: (data) => {
       alert(`成功爬取 ${data.count} 篇文章！`)
+      // 刷新文章列表缓存，使Articles页面显示最新数据
+      // 使用通配符匹配所有articles查询
+      queryClient.invalidateQueries({ queryKey: ['articles'], refetchType: 'all' })
     },
   })
 
@@ -50,6 +58,12 @@ export default function HomePage() {
     mutationFn: (data: IntelligenceRequest) => api.intelligence(data),
     onSuccess: (data) => {
       alert(`一键情报完成！爬取 ${data.article_count} 篇文章，已生成分析报告。`)
+      // 刷新文章列表缓存
+      queryClient.invalidateQueries({ queryKey: ['articles'], refetchType: 'all' })
+      // 自动跳转到分析报告详情页面
+      if (data.analysis_id) {
+        navigate(`/analysis/${data.analysis_id}`)
+      }
     },
   })
 
@@ -115,7 +129,8 @@ export default function HomePage() {
                 <option value="news">新闻资讯（传统媒体）</option>
                 <option value="tech">科技互联网（36氪、少数派、IT之家）</option>
                 <option value="developer">开发者（GitHub、Hacker News、掘金）</option>
-                <option value="finance">财经金融（华尔街见闻、东方财富）</option>
+                <option value="finance">财经金融（财联社、金十数据、东方财富）</option>
+                <option value="crypto">加密货币（金色财经、律动、TokenInsight）</option>
                 <option value="entertainment">娱乐影视（豆瓣电影、B站）</option>
                 <option value="gaming">游戏电竞（Steam、TapTap）</option>
                 <option value="anime">动漫二次元（Bangumi、ACG资讯）</option>

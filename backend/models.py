@@ -36,6 +36,7 @@ class IndustryCategory(str, Enum):
     TECH = "tech"               # 科技互联网：36氪、少数派、IT之家等
     DEVELOPER = "developer"     # 开发者：GitHub、Hacker News、掘金等
     FINANCE = "finance"         # 财经金融：华尔街见闻、东方财富等
+    CRYPTO = "crypto"           # 加密货币：金色财经、律动、Paradigm等
     ENTERTAINMENT = "entertainment"  # 娱乐影视：豆瓣电影、B站等
     GAMING = "gaming"           # 游戏电竞：Steam、TapTap等
     ANIME = "anime"             # 动漫二次元：Bangumi、ACG资讯

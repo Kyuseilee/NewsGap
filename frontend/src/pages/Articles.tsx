@@ -18,8 +18,8 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const { data: articlesData, isLoading, refetch } = useQuery({
-    queryKey: ['articles'],
-    queryFn: () => api.getArticles({ limit: 200, archived: undefined }),
+    queryKey: ['articles', 1000],  // 添加limit到缓存键
+    queryFn: () => api.getArticles({ limit: 1000, archived: undefined }),  // 增加到1000
   })
 
   const { data: backends } = useQuery({
@@ -101,7 +101,12 @@ export default function ArticlesPage() {
       }),
     onSuccess: (data) => {
       if (data.analysis && data.analysis.id) {
+        // 自动跳转到分析结果页面
         navigate(`/analysis/${data.analysis.id}`)
+        // 清空选择
+        setSelectedArticles([])
+      } else {
+        alert('分析完成，但无法获取结果ID')
       }
     },
     onError: (error: any) => {
@@ -316,10 +321,19 @@ export default function ArticlesPage() {
             <button
               onClick={handleAnalyze}
               disabled={selectedArticles.length === 0 || analyzeMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              <Zap size={18} />
-              {analyzeMutation.isPending ? '分析中...' : '分析选中文章'}
+              {analyzeMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  正在分析 {selectedArticles.length} 篇文章...
+                </>
+              ) : (
+                <>
+                  <Zap size={18} />
+                  分析选中文章 ({selectedArticles.length})
+                </>
+              )}
             </button>
 
             <button

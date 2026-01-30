@@ -29,7 +29,7 @@ async def get_articles(
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
     tags: Optional[List[str]] = Query(None),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(100, ge=1, le=2000),  # 增加到2000
     offset: int = Query(0, ge=0),
     archived: Optional[bool] = None,
     db: Database = Depends(get_db)
@@ -39,6 +39,7 @@ async def get_articles(
     
     支持按行业、时间范围、标签过滤
     """
+    # 获取文章列表
     articles = await db.query_articles(
         industry=industry,
         start_time=start_time,
@@ -49,8 +50,17 @@ async def get_articles(
         archived=archived
     )
     
-    # TODO: 实现总数统计（需要额外查询）
-    total = len(articles)
+    # 获取总数（不带分页限制）
+    all_articles = await db.query_articles(
+        industry=industry,
+        start_time=start_time,
+        end_time=end_time,
+        tags=tags,
+        limit=999999,  # 获取所有文章来计算总数
+        offset=0,
+        archived=archived
+    )
+    total = len(all_articles)
     
     return ArticleListResponse(
         articles=articles,

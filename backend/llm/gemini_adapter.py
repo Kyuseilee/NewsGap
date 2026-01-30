@@ -9,7 +9,7 @@ from typing import List, Optional
 from datetime import datetime
 import google.generativeai as genai
 
-from models import Article, Analysis, AnalysisType, Trend, Signal, InformationGap
+from models import Article, Analysis, AnalysisType, IndustryCategory, Trend, Signal, InformationGap
 from llm.adapter import BaseLLMAdapter
 
 # 配置日志
@@ -42,7 +42,7 @@ class GeminiAdapter(BaseLLMAdapter):
                 temperature=0.3,
                 max_output_tokens=8192,  # Gemini 2.5 Flash的最大输出token
                 candidate_count=1,  # 只生成1个候选，避免分散token
-                # 如果使用Gemini 2.5 Pro，可以设置到更高
+                stop_sequences=None,  # 不设置停止序列，让模型完整输出
             )
         )
     
@@ -50,11 +50,19 @@ class GeminiAdapter(BaseLLMAdapter):
         self,
         articles: List[Article],
         analysis_type: AnalysisType,
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
+        industry: Optional[IndustryCategory] = None
     ) -> Analysis:
-        """使用 Gemini 进行分析"""
-        system_prompt = self._build_system_prompt(analysis_type)
-        user_prompt = self._build_markdown_prompt(articles, custom_prompt)
+        """使用 Gemini 进行分析
+        
+        Args:
+            articles: 待分析的文章列表
+            analysis_type: 分析类型
+            custom_prompt: 自定义提示词（可选）
+            industry: 品类类型（可选，用于品类化prompt配置）
+        """
+        system_prompt = self._build_system_prompt(analysis_type, industry)
+        user_prompt = self._build_markdown_prompt(articles, custom_prompt, industry, analysis_type)
         
         start_time = datetime.now()
         
@@ -152,38 +160,27 @@ class GeminiAdapter(BaseLLMAdapter):
             processing_time_seconds=processing_time
         )
     
-    def _build_system_prompt(self, analysis_type: AnalysisType) -> str:
-        """构建系统提示词 - 信号优先版"""
-        return """你不是新闻摘要器，而是一名"决策导向型行业情报分析师"。
-
-你的目标不是覆盖所有信息，而是：
-- 在大量杂讯中，快速识别**真正改变格局的少数信号**
-- 为"理性决策者"提供**可行动、可取舍、可忽略的信息结构**
-
-【核心原则】
-1. **残忍筛选原则**：允许忽略、合并、弱化大量低价值文章，只有"改变判断"的内容才值得展开
-2. **主线优先原则**：先识别3-5条"今日主线叙事"，所有文章只是这些主线的"证据"或"噪音"
-3. **去均值原则**：避免大量7/10、8/10的模糊评分，重要性必须形成明显梯度（10/8/5/忽略）
-4. **决策视角原则**：假设读者关注宏观风险、产业方向与中长期配置的理性决策者
-5. **压缩优先原则**：宁可少写一半，也不要信息密度下降
-
-【允许的操作】
-- 将同类文章合并为"信息簇"
-- 对低价值内容只做一句话处理，甚至完全不写
-- 明确指出："这一类信息今天不重要"
-
-输出要求：
-1. 使用清晰的 Markdown 格式
-2. 信息密度 > 覆盖率
-3. 判断清晰 > 面面俱到
-4. 不要截断内容，确保报告完整"""
+    def _build_system_prompt(
+        self, 
+        analysis_type: AnalysisType,
+        industry: Optional[IndustryCategory] = None
+    ) -> str:
+        """构建系统提示词 - 支持品类化配置"""
+        from prompts import get_prompt_manager
+        prompt_manager = get_prompt_manager()
+        return prompt_manager.get_system_prompt(industry, analysis_type)
     
     def _build_markdown_prompt(
         self,
         articles: List[Article],
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
+        industry: Optional[IndustryCategory] = None,
+        analysis_type: Optional[AnalysisType] = None
     ) -> str:
-        """构建 Markdown 报告提示词 - 压缩版"""
+        """构建 Markdown 报告提示词 - 支持品类化配置与压缩"""
+        from prompts import get_prompt_manager
+        prompt_manager = get_prompt_manager()
+        
         article_count = len(articles)
         
         # 动态调整压缩策略
@@ -210,27 +207,15 @@ class GeminiAdapter(BaseLLMAdapter):
 
 """
         
-        task_desc = custom_prompt or f"""
-⚠️ **重要提醒**：你收到了 {article_count} 条信息，但**不需要逐条分析**。
-
-你的任务是：
-1. **残忍筛选**：快速识别出其中真正值得关注的 20-30% 信息
-2. **主线聚合**：将重要信息聚合成 3-5 条主线叙事
-3. **忽略噪音**：明确说明哪些信息被过滤掉了，以及原因
-4. **决策导向**：每个判断都要指向"该做什么"或"该关注什么"
-
-**不要**：
-- ❌ 逐条分析每篇文章
-- ❌ 给所有内容都打 7/10、8/10 的分
-- ❌ 罗列事件而不做判断
-- ❌ 写超过 3 页的报告（除非信息密度极高）
-
-**要做**：
-- ✅ 只深入分析真正改变判断的信息
-- ✅ 对不重要的信息合并或一句话带过
-- ✅ 明确说"这类信息今天不重要"
-- ✅ 每段话都要有"所以呢？"的答案
-"""
+        # 获取品类特定的用户提示词模板
+        if custom_prompt:
+            task_desc = custom_prompt
+        else:
+            task_template = prompt_manager.get_user_prompt_template(industry)
+            task_desc = task_template.replace("{{article_count}}", str(article_count))
+        
+        # 获取品类特定的报告格式（传入analysis_type）
+        report_format = prompt_manager.get_report_format_prompt(industry, analysis_type)
         
         return f"""{task_desc}
 
@@ -238,52 +223,7 @@ class GeminiAdapter(BaseLLMAdapter):
 
 ---
 
-请按以下结构生成**高度压缩、主线清晰**的报告：
-
-# 📊 行业情报分析报告
-
-## 一、执行摘要（给只读3分钟的人）
-用**3-5条要点**说明：
-- 今天真正发生了什么"结构性变化"
-- 哪些风险在上升，哪些只是噪音
-- 哪些方向值得持续跟踪
-
-避免罗列事件，强调**判断变化**。
-
-## 二、今日主线叙事（最多5条）
-
-### 主线 1：【一句话结论式标题】
-- **核心判断**：这条主线意味着什么
-- **关键信号**：哪些事件支撑了这个判断（引用文章编号如[1][5][12]）
-- **被忽略的反证**：有没有相反信息？为何权重较低
-- **影响半径**：影响哪些国家/行业/资产/群体
-
-（其余主线同样结构，最多5条）
-
-## 三、关键信号清单
-
-只列**真正值得"盯住"的信号**，每个信号：
-- **类型**：地缘政治/产业/政策/技术
-- **为何重要**：它改变了什么"默认假设"
-- **置信度**：高/中/低
-- **跟踪建议**：接下来应关注什么
-
-## 四、被过滤掉的内容
-
-简要说明：
-- 哪几类信息今天占比很高但价值有限
-- 为什么不值得投入注意力
-
-## 五、行动提示
-
-从以下角度给出**明确但克制**的建议：
-- **风险规避**
-- **机会布局**
-- **信息跟踪**
-
----
-*报告生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}*
-*原始信息数量：{article_count} 条*
+{report_format}
 
 ⚠️ **提醒**：直接输出 Markdown，不要用代码块包裹。确保报告完整，不中途截断。
 """

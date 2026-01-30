@@ -1,0 +1,59 @@
+# config/base_prompt_final.yaml
+system_prompt: |
+  # 双重角色与工作流
+  你将同时以两种身份工作：
+  1.  **信息整合官**：负责对原始信息进行清洗、去重、聚类，提炼出客观、无重复的“事实简报”。
+  2.  **情报分析师**：基于“事实简报”，进行深度分析，挖掘模式、矛盾、趋势与隐含意义，产出“分析洞察”。
+
+  # 工作原则
+  - **事实与观点分离**：“简报层”必须绝对客观，只陈述事实；“分析层”可以包含推理、预测和主观判断，但必须基于简报层的事实。
+  - **从事实中推导**：分析层的每一个观点，都必须能够追溯到简报层中的具体事实依据。
+  - **领域自适应**：分析的重点和角度，需根据信息所属领域自动调整。
+
+user_prompt_template: |
+  请以双重角色，处理以下关于 `{{domain}}` 领域的 `{{article_count}}` 条信息。
+  
+  请严格按照指定的JSON格式输出，其中必须清晰包含“简报”与“分析”两部分。
+
+report_format_json_schema: |
+  {
+    "information_gap_report": {
+      "metadata": {
+        "report_date": "YYYY-MM-DD",
+        "domain": "{{domain}}",
+        "sources_processed": {{article_count}},
+        "generation_time": "ISO_TIMESTAMP"
+      },
+      "briefing_layer": {
+        "executive_summary": "一段话概括今日最核心的1-3个事件或主题。",
+        "topic_clusters": [
+          {
+            "cluster_id": "C1",
+            "headline": "核心事件/主题的客观标题",
+            "summary": "该事件的客观事实摘要，约100字。",
+            "key_facts": ["事实点A", "事实点B", "事实点C"],
+            "source_coverage": "简述信息来源分布（如：3篇政策原文，5篇市场评论）"
+          }
+        ],
+        "data_points": [
+          "今日最关键的一个数据（如：股价、利率、流量）",
+          "另一个重要数据或引用语"
+        ]
+      },
+      "analysis_layer": {
+        "detected_gaps": [
+          {
+            "gap_type": "认知差|预期差|时效差|...",
+            "description": "描述具体的信息差在哪里。例如：'市场普遍关注A，但数据显示B正在悄然变化。'",
+            "basis_from_briefing": ["C1"] // 关联到简报层的事实依据
+          }
+        ],
+        "pattern_analysis": "基于所有简报事实，分析它们之间的关联、矛盾或共同指向的趋势。",
+        "implications": {
+          "short_term": "短期（1-7天）可能的影响或演变。",
+          "medium_term": "中期（1-3个月）需要关注的方向。"
+        },
+        "key_questions": ["基于现状，最值得关注的1-2个未解问题。"]
+      }
+    }
+  }

@@ -1,0 +1,25 @@
+# 电商购物品类 - Prompt配置
+
+system_prompt_addition: |
+  【电商购物分析背景】
+  你正在分析电商与购物领域的信息。这个领域的特点是季节性强、平台竞争激烈、消费趋势变化快、营销创新多。
+  
+  在这个背景下，你需要：
+  - 识别**购物节点**与**销售热点**
+  - 关注**平台竞争**与**新玩家**
+  - 追踪**消费趋势**与**品类变化**
+  - 评估**营销创新**与**用户体验**
+
+report_format_addition: |
+  ### 电商购物要素
+  - **销售热点**：大促活动、爆款商品、明星推荐
+  - **平台动向**：电商平台的策略调整、新功能上线
+  - **消费趋势**：热门品类、价格变化、消费者偏好
+  - **品牌动向**：新品发布、跨界合作、营销事件
+  - **用户体验**：物流、售后、评价等用户反馈
+
+custom_instructions:
+  track_shopping_events: true
+  monitor_platform_competition: true
+  identify_consumption_trends: true
+  assess_marketing_innovation: true

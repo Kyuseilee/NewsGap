@@ -11,6 +11,7 @@ const INDUSTRY_CATEGORIES = {
   tech: '科技互联网',
   developer: '开发者',
   finance: '财经金融',
+  crypto: '加密货币',
   entertainment: '娱乐影视',
   gaming: '游戏电竞',
   anime: '动漫二次元',
@@ -126,6 +127,7 @@ function SourceEditor({ source, onClose }: SourceEditorProps) {
                 <option value="tech">科技互联网</option>
                 <option value="developer">开发者</option>
                 <option value="finance">财经金融</option>
+                <option value="crypto">加密货币</option>
                 <option value="entertainment">娱乐影视</option>
                 <option value="gaming">游戏电竞</option>
                 <option value="anime">动漫二次元</option>

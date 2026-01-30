@@ -181,7 +181,7 @@ class Database(StorageInterface):
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         
-        query += " ORDER BY a.published_at DESC LIMIT ? OFFSET ?"
+        query += " ORDER BY a.fetched_at DESC LIMIT ? OFFSET ?"
         params.extend([limit, offset])
         
         async with aiosqlite.connect(self.db_path) as db:

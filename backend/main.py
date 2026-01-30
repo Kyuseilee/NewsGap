@@ -46,8 +46,8 @@ async def _insert_default_sources(db: Database):
         # 新闻类
         Source(name="联合早报 - 中港台即时", url="https://plink.anyfeeder.com/zaobao/realtime/china", source_type=SourceType.RSS, industry=IndustryCategory.NEWS, enabled=True),
         Source(name="联合早报 - 国际即时", url="https://plink.anyfeeder.com/zaobao/realtime/world", source_type=SourceType.RSS, industry=IndustryCategory.NEWS, enabled=True),
-        Source(name="南方周末 - 新闻", url="https://rsshub.app/infzm/2", source_type=SourceType.RSS, industry=IndustryCategory.NEWS, enabled=True),
-        Source(name="微博热搜榜", url="https://rsshub.app/weibo/search/hot", source_type=SourceType.RSS, industry=IndustryCategory.SOCIAL, enabled=True),
+        Source(name="南方周末 - 新闻", url="http://localhost:1200/infzm/2", source_type=SourceType.RSS, industry=IndustryCategory.NEWS, enabled=True),
+        Source(name="微博热搜榜", url="http://localhost:1200/weibo/search/hot", source_type=SourceType.RSS, industry=IndustryCategory.SOCIAL, enabled=True),
         
         # 技术/产品
         Source(name="36氪", url="https://36kr.com/feed", source_type=SourceType.RSS, industry=IndustryCategory.TECH, enabled=True),
@@ -65,18 +65,18 @@ async def _insert_default_sources(db: Database):
         # 金融
         Source(name="华尔街日报中文网", url="https://cn.wsj.com/zh-hans/rss", source_type=SourceType.RSS, industry=IndustryCategory.FINANCE, enabled=True),
         Source(name="FT中文网", url="https://www.ftchinese.com/rss/feed", source_type=SourceType.RSS, industry=IndustryCategory.FINANCE, enabled=True),
-        Source(name="第一财经", url="https://rsshub.app/yicai/brief", source_type=SourceType.RSS, industry=IndustryCategory.FINANCE, enabled=True),
+        Source(name="第一财经", url="http://localhost:1200/yicai/brief", source_type=SourceType.RSS, industry=IndustryCategory.FINANCE, enabled=True),
         
         # 医疗健康 -> 归类到生活方式
-        Source(name="丁香园", url="https://rsshub.app/dxy/vaccine/latest", source_type=SourceType.RSS, industry=IndustryCategory.LIFESTYLE, enabled=True),
+        Source(name="丁香园", url="http://localhost:1200/dxy/vaccine/latest", source_type=SourceType.RSS, industry=IndustryCategory.LIFESTYLE, enabled=True),
         
         # 教育
         Source(name="中国日报 - 双语新闻", url="https://plink.anyfeeder.com/chinadaily/dual", source_type=SourceType.RSS, industry=IndustryCategory.EDUCATION, enabled=True),
-        Source(name="ONE · 一个", url="https://rsshub.app/one", source_type=SourceType.RSS, industry=IndustryCategory.EDUCATION, enabled=True),
+        Source(name="ONE · 一个", url="http://localhost:1200/one", source_type=SourceType.RSS, industry=IndustryCategory.EDUCATION, enabled=True),
         
         # 社区
         Source(name="知乎每日精选", url="https://www.zhihu.com/rss", source_type=SourceType.RSS, industry=IndustryCategory.SOCIAL, enabled=True),
-        Source(name="知乎热榜", url="https://rsshub.app/zhihu/hotlist", source_type=SourceType.RSS, industry=IndustryCategory.SOCIAL, enabled=True),
+        Source(name="知乎热榜", url="http://localhost:1200/zhihu/hotlist", source_type=SourceType.RSS, industry=IndustryCategory.SOCIAL, enabled=True),
     ]
     
     success_count = 0
