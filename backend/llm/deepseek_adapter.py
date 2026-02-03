@@ -3,6 +3,7 @@ DeepSeek API 适配器
 """
 
 import json
+import httpx
 from typing import List, Optional
 from datetime import datetime
 from openai import AsyncOpenAI
@@ -17,12 +18,25 @@ class DeepSeekAdapter(BaseLLMAdapter):
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        proxy_url: Optional[str] = None
     ):
-        super().__init__(api_key=api_key, model=model or "deepseek-chat")
+        super().__init__(api_key=api_key, model=model or "deepseek-chat", proxy_url=proxy_url)
+        
+        # 配置HTTP客户端以支持代理
+        http_client = None
+        if self.proxy_url:
+            http_client = httpx.AsyncClient(
+                proxies={
+                    'http://': self.proxy_url,
+                    'https://': self.proxy_url,
+                }
+            )
+        
         self.client = AsyncOpenAI(
             api_key=self.api_key,
-            base_url="https://api.deepseek.com"
+            base_url="https://api.deepseek.com",
+            http_client=http_client
         )
     
     async def analyze(

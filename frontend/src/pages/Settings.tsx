@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Key, Eye, EyeOff, Check, X, Edit, Trash2 } from 'lucide-react'
+import { Key, Eye, EyeOff, Check, X, Edit, Trash2, Globe } from 'lucide-react'
 import { api } from '@/services/api'
 import SourceManager from '@/components/SourceManager'
 import { CustomCategoryManager } from '@/components/CustomCategoryManager'
@@ -20,6 +20,12 @@ export default function SettingsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">设置</h1>
       </div>
+
+      {/* 代理配置 */}
+      <section className="mb-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">网络代理配置</h2>
+        <ProxyConfigManager />
+      </section>
 
       {/* API Key 管理 */}
       <section className="mb-12">
@@ -55,6 +61,239 @@ export default function SettingsPage() {
           </p>
         </div>
       </section>
+    </div>
+  )
+}
+
+function ProxyConfigManager() {
+  const [isEditing, setIsEditing] = useState(false)
+  const [config, setConfig] = useState({
+    enabled: false,
+    host: '',
+    port: 0,
+    protocol: 'http',
+  })
+  const queryClient = useQueryClient()
+
+  const { data: proxyConfig } = useQuery({
+    queryKey: ['proxy-config'],
+    queryFn: () => api.getProxyConfig(),
+  })
+
+  const setProxyMutation = useMutation({
+    mutationFn: (config: any) => api.setProxyConfig(config),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['proxy-config'] })
+      setIsEditing(false)
+      alert(data.message || '代理配置已保存')
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.detail || '代理配置保存失败')
+    },
+  })
+
+  const deleteProxyMutation = useMutation({
+    mutationFn: () => api.deleteProxyConfig(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['proxy-config'] })
+      alert(data.message || '代理配置已禁用')
+    },
+  })
+
+  const handleEdit = () => {
+    setConfig({
+      enabled: proxyConfig?.enabled || false,
+      host: proxyConfig?.host || '',
+      port: proxyConfig?.port || 0,
+      protocol: proxyConfig?.protocol || 'http',
+    })
+    setIsEditing(true)
+  }
+
+  const handleSave = () => {
+    if (config.enabled && (!config.host || config.port <= 0)) {
+      alert('请输入有效的代理地址和端口')
+      return
+    }
+    setProxyMutation.mutate(config)
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    setConfig({
+      enabled: false,
+      host: '',
+      port: 0,
+      protocol: 'http',
+    })
+  }
+
+  const handleDisable = () => {
+    if (confirm('确定要禁用代理配置吗？')) {
+      deleteProxyMutation.mutate()
+    }
+  }
+
+  const isConfigured = proxyConfig?.enabled && proxyConfig?.host
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Globe size={24} className="text-gray-400" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">HTTP/SOCKS5 代理</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              配置网络代理以访问RSS源和AI API（适用于受限网络环境）
+            </p>
+          </div>
+          {isConfigured && !isEditing && (
+            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+              已启用
+            </span>
+          )}
+        </div>
+      </div>
+
+      {isEditing ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="proxy-enabled"
+              checked={config.enabled}
+              onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            />
+            <label htmlFor="proxy-enabled" className="text-sm font-medium text-gray-700">
+              启用代理
+            </label>
+          </div>
+
+          {config.enabled && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  代理协议
+                </label>
+                <select
+                  value={config.protocol}
+                  onChange={(e) => setConfig({ ...config, protocol: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="http">HTTP</option>
+                  <option value="socks5">SOCKS5</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    代理地址
+                  </label>
+                  <input
+                    type="text"
+                    value={config.host}
+                    onChange={(e) => setConfig({ ...config, host: e.target.value })}
+                    placeholder="例如: 127.0.0.1 或 proxy.example.com"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    端口
+                  </label>
+                  <input
+                    type="number"
+                    value={config.port || ''}
+                    onChange={(e) => setConfig({ ...config, port: parseInt(e.target.value) || 0 })}
+                    placeholder="例如: 7890"
+                    min="1"
+                    max="65535"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleSave}
+              disabled={setProxyMutation.isPending}
+              className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              <Check size={16} />
+              保存
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+            >
+              <X size={16} />
+              取消
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {isConfigured ? (
+            <div className="space-y-3">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">协议:</span>
+                    <span className="ml-2 font-medium text-gray-900 uppercase">
+                      {proxyConfig.protocol}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">地址:</span>
+                    <span className="ml-2 font-medium text-gray-900">{proxyConfig.host}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">端口:</span>
+                    <span className="ml-2 font-medium text-gray-900">{proxyConfig.port}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                >
+                  <Edit size={16} />
+                  修改
+                </button>
+                <button
+                  onClick={handleDisable}
+                  className="flex items-center gap-1 px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                >
+                  <Trash2 size={16} />
+                  禁用
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-500 mb-4">未配置代理</p>
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                配置代理
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          <strong>提示</strong>：配置代理后，所有RSS拉取和AI API调用都将通过代理服务器。
+          支持HTTP和SOCKS5协议。常见代理工具：Clash (7890端口)、V2Ray等。
+        </p>
+      </div>
     </div>
   )
 }

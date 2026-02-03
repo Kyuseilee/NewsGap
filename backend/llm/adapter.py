@@ -18,9 +18,16 @@ from prompts import get_prompt_manager
 class BaseLLMAdapter(LLMAdapterInterface, ABC):
     """LLM 适配器基类"""
     
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, proxy_url: Optional[str] = None):
+        """
+        Args:
+            api_key: API密钥
+            model: 模型名称
+            proxy_url: 代理URL，格式: 'http://host:port'
+        """
         self.api_key = api_key
         self.model = model
+        self.proxy_url = proxy_url
     
     def estimate_cost(self, articles: List[Article]) -> dict:
         """估算分析成本"""
@@ -197,7 +204,8 @@ class BaseLLMAdapter(LLMAdapterInterface, ABC):
 def create_llm_adapter(
     backend: str,
     api_key: Optional[str] = None,
-    model: Optional[str] = None
+    model: Optional[str] = None,
+    proxy_url: Optional[str] = None
 ) -> BaseLLMAdapter:
     """
     创建 LLM 适配器
@@ -206,24 +214,25 @@ def create_llm_adapter(
         backend: "ollama", "openai", "deepseek", "gemini"
         api_key: API 密钥（本地模型不需要）
         model: 模型名称
+        proxy_url: 代理URL，格式: 'http://host:port'
     """
     backend = backend.lower()
     
     if backend == "ollama":
         from llm.ollama_adapter import OllamaAdapter
-        return OllamaAdapter(model=model)
+        return OllamaAdapter(model=model, proxy_url=proxy_url)
     
     elif backend == "openai":
         from llm.openai_adapter import OpenAIAdapter
-        return OpenAIAdapter(api_key=api_key, model=model)
+        return OpenAIAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
     
     elif backend == "deepseek":
         from llm.deepseek_adapter import DeepSeekAdapter
-        return DeepSeekAdapter(api_key=api_key, model=model)
+        return DeepSeekAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
     
     elif backend == "gemini":
         from llm.gemini_adapter import GeminiAdapter
-        return GeminiAdapter(api_key=api_key, model=model)
+        return GeminiAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
     
     else:
         raise ValueError(f"Unknown LLM backend: {backend}")

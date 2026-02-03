@@ -5,6 +5,7 @@ Google Gemini API 适配器
 import json
 import asyncio
 import logging
+import os
 from typing import List, Optional
 from datetime import datetime
 import google.generativeai as genai
@@ -23,13 +24,20 @@ class GeminiAdapter(BaseLLMAdapter):
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        proxy_url: Optional[str] = None
     ):
         # 使用最新稳定的 Gemini 2.5 Flash 模型
-        super().__init__(api_key=api_key, model=model or "gemini-2.5-flash")
+        super().__init__(api_key=api_key, model=model or "gemini-2.5-flash", proxy_url=proxy_url)
         
         if not self.api_key:
             raise ValueError("Gemini API Key is required. Please configure it in Settings.")
+        
+        # 如果提供了代理，设置环境变量（google.generativeai通过httpx使用代理）
+        if self.proxy_url:
+            os.environ['HTTP_PROXY'] = self.proxy_url
+            os.environ['HTTPS_PROXY'] = self.proxy_url
+            logger.info(f"Gemini 使用代理: {self.proxy_url}")
         
         # 配置 Google GenAI
         genai.configure(api_key=self.api_key)

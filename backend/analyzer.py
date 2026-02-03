@@ -16,12 +16,14 @@ class Analyzer:
         self,
         llm_backend: str = "deepseek",
         api_key: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        proxy_url: Optional[str] = None
     ):
         self.adapter: BaseLLMAdapter = create_llm_adapter(
             backend=llm_backend,
             api_key=api_key,
-            model=model
+            model=model,
+            proxy_url=proxy_url
         )
     
     async def analyze(

@@ -190,4 +190,25 @@ export const api = {
   removeSourceFromCustomCategory: async (categoryId: string, sourceId: string): Promise<void> => {
     await client.delete(`/api/custom-categories/${categoryId}/sources/${sourceId}`)
   },
+
+  // 代理配置
+  getProxyConfig: async (): Promise<any> => {
+    const { data } = await client.get('/api/config/proxy')
+    return data
+  },
+
+  setProxyConfig: async (config: {
+    enabled: boolean
+    host: string
+    port: number
+    protocol: string
+  }): Promise<any> => {
+    const { data } = await client.post('/api/config/proxy', config)
+    return data
+  },
+
+  deleteProxyConfig: async (): Promise<any> => {
+    const { data } = await client.delete('/api/config/proxy')
+    return data
+  },
 }

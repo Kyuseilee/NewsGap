@@ -17,9 +17,10 @@ class OllamaAdapter(BaseLLMAdapter):
     def __init__(
         self,
         model: Optional[str] = None,
-        base_url: str = "http://localhost:11434"
+        base_url: str = "http://localhost:11434",
+        proxy_url: Optional[str] = None
     ):
-        super().__init__(api_key=None, model=model or "llama3.1")
+        super().__init__(api_key=None, model=model or "llama3.1", proxy_url=proxy_url)
         self.base_url = base_url
     
     async def analyze(
@@ -42,8 +43,16 @@ class OllamaAdapter(BaseLLMAdapter):
         
         start_time = datetime.now()
         
+        # 配置代理（如果提供）
+        proxies = None
+        if self.proxy_url:
+            proxies = {
+                'http://': self.proxy_url,
+                'https://': self.proxy_url,
+            }
+        
         # 调用 Ollama API（生成Markdown而不是JSON）
-        async with httpx.AsyncClient(timeout=300) as client:
+        async with httpx.AsyncClient(timeout=300, proxies=proxies) as client:
             response = await client.post(
                 f"{self.base_url}/api/generate",
                 json={

@@ -24,9 +24,12 @@ async def get_db():
     return db
 
 
-async def get_crawler():
-    """依赖注入：爬虫"""
-    return CrawlerService()
+async def get_crawler(db: Database = Depends(get_db)):
+    """依赖注入：爬虫（带代理配置）"""
+    from config_manager import ConfigManager
+    config_mgr = ConfigManager(db)
+    proxy_url = await config_mgr.get_proxy_url()
+    return CrawlerService(proxy_url=proxy_url)
 
 
 @router.post("", response_model=FetchResponse)
