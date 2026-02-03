@@ -45,6 +45,45 @@ CREATE INDEX IF NOT EXISTS idx_sources_type ON sources(source_type);
 
 
 -- ============================================================================
+-- 自定义分类表
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS custom_categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    custom_prompt TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    metadata TEXT,  -- JSON string
+    
+    CHECK (length(name) > 0 AND length(name) <= 100),
+    CHECK (length(custom_prompt) >= 10),
+    CHECK (enabled IN (0, 1))
+);
+
+CREATE INDEX IF NOT EXISTS idx_custom_categories_enabled ON custom_categories(enabled);
+CREATE INDEX IF NOT EXISTS idx_custom_categories_name ON custom_categories(name);
+
+
+-- ============================================================================
+-- 自定义分类-信息源关联表（多对多）
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS custom_category_sources (
+    category_id TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (category_id, source_id),
+    FOREIGN KEY (category_id) REFERENCES custom_categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_custom_category_sources_category ON custom_category_sources(category_id);
+CREATE INDEX IF NOT EXISTS idx_custom_category_sources_source ON custom_category_sources(source_id);
+
+
+-- ============================================================================
 -- 文章表
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS articles (

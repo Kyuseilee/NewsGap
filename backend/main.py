@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from routes import fetch, analyze, intelligence, articles, config, analyses
+from routes import fetch, analyze, intelligence, articles, config, analyses, custom_categories
 from storage.database import Database
 
 
@@ -119,6 +119,7 @@ app.include_router(intelligence.router)
 app.include_router(articles.router)
 app.include_router(config.router)
 app.include_router(analyses.router)
+app.include_router(custom_categories.router)
 
 
 @app.get("/")

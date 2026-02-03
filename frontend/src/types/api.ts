@@ -27,10 +27,13 @@ export interface Source {
   name: string
   url: string
   source_type: 'rss' | 'web' | 'api'
+  priority?: string
   industry: string
   enabled: boolean
   fetch_interval_hours: number
   last_fetched_at?: string
+  last_error?: string
+  error_count?: number
   created_at?: string
   metadata?: Record<string, any>
 }
@@ -105,7 +108,8 @@ export interface AnalyzeResponse {
 }
 
 export interface IntelligenceRequest {
-  industry: string
+  industry?: string
+  custom_category_id?: string
   hours: number
   llm_backend: string
   llm_model?: string
@@ -118,4 +122,31 @@ export interface IntelligenceResponse {
   analysis_id: string
   analysis: Analysis
   total_time_seconds: number
+}
+
+export interface CustomCategory {
+  id?: string
+  name: string
+  description?: string
+  custom_prompt: string
+  source_ids: string[]
+  enabled: boolean
+  created_at?: string
+  updated_at?: string
+  metadata?: Record<string, any>
+}
+
+export interface CreateCustomCategoryRequest {
+  name: string
+  description?: string
+  custom_prompt: string
+  source_ids?: string[]
+}
+
+export interface UpdateCustomCategoryRequest {
+  name?: string
+  description?: string
+  custom_prompt?: string
+  source_ids?: string[]
+  enabled?: boolean
 }

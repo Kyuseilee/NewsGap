@@ -12,6 +12,9 @@ import type {
   IntelligenceRequest,
   IntelligenceResponse,
   Analysis,
+  CustomCategory,
+  CreateCustomCategoryRequest,
+  UpdateCustomCategoryRequest,
 } from '@/types/api'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
@@ -146,5 +149,45 @@ export const api = {
   getAnalysesList: async (): Promise<Analysis[]> => {
     const { data } = await client.get('/api/analyses')
     return data
+  },
+
+  // 自定义分类相关
+  getCustomCategories: async (params?: {
+    enabled_only?: boolean
+  }): Promise<CustomCategory[]> => {
+    const { data } = await client.get('/api/custom-categories', { params })
+    return data
+  },
+
+  getCustomCategory: async (id: string): Promise<CustomCategory> => {
+    const { data } = await client.get(`/api/custom-categories/${id}`)
+    return data
+  },
+
+  createCustomCategory: async (request: CreateCustomCategoryRequest): Promise<CustomCategory> => {
+    const { data } = await client.post('/api/custom-categories', request)
+    return data
+  },
+
+  updateCustomCategory: async (id: string, request: UpdateCustomCategoryRequest): Promise<CustomCategory> => {
+    const { data } = await client.put(`/api/custom-categories/${id}`, request)
+    return data
+  },
+
+  deleteCustomCategory: async (id: string): Promise<void> => {
+    await client.delete(`/api/custom-categories/${id}`)
+  },
+
+  getCustomCategorySources: async (categoryId: string): Promise<Source[]> => {
+    const { data } = await client.get(`/api/custom-categories/${categoryId}/sources`)
+    return data
+  },
+
+  addSourceToCustomCategory: async (categoryId: string, sourceId: string): Promise<void> => {
+    await client.post(`/api/custom-categories/${categoryId}/sources/${sourceId}`)
+  },
+
+  removeSourceFromCustomCategory: async (categoryId: string, sourceId: string): Promise<void> => {
+    await client.delete(`/api/custom-categories/${categoryId}/sources/${sourceId}`)
   },
 }

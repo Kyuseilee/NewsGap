@@ -14,11 +14,12 @@ from pathlib import Path
 from models import (
     Article, Source, Analysis, Tag,
     IndustryCategory, AnalysisType,
-    StorageInterface
+    StorageInterface, CustomCategory
 )
+from storage.custom_category_db import CustomCategoryDB
 
 
-class Database(StorageInterface):
+class Database(StorageInterface, CustomCategoryDB):
     """SQLite 数据库管理器"""
     
     def __init__(self, db_path: str = "./data/newsgap.db"):

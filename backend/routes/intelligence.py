@@ -46,23 +46,64 @@ async def fetch_and_analyze(
     """
     一键情报
     
-    先爬取，再分析，一步到位
+    先爬取，再分析，一步到位。
+    支持标准行业分类或自定义分类。
     """
     start_time = time.time()
     
-    # 第一步：爬取
-    sources = await db.get_sources(
-        industry=request.industry,
-        enabled_only=True
-    )
+    # 验证：industry 和 custom_category_id 二选一
+    if not request.industry and not request.custom_category_id:
+        raise HTTPException(
+            status_code=400,
+            detail="必须指定 industry 或 custom_category_id"
+        )
     
-    if request.source_ids:
-        sources = [s for s in sources if s.id in request.source_ids]
+    if request.industry and request.custom_category_id:
+        raise HTTPException(
+            status_code=400,
+            detail="industry 和 custom_category_id 不能同时指定"
+        )
+    
+    # 获取自定义提示词（如果使用自定义分类）
+    custom_prompt = None
+    category_name = None
+    
+    if request.custom_category_id:
+        category = await db.get_custom_category(request.custom_category_id)
+        if not category:
+            raise HTTPException(
+                status_code=404,
+                detail=f"未找到自定义分类 {request.custom_category_id}"
+            )
+        if not category.enabled:
+            raise HTTPException(
+                status_code=400,
+                detail=f"自定义分类 '{category.name}' 已禁用"
+            )
+        custom_prompt = category.custom_prompt
+        category_name = category.name
+        
+        # 获取分类关联的源
+        sources = await db.get_sources_by_custom_category(request.custom_category_id)
+        
+        # 如果还指定了source_ids，进一步筛选
+        if request.source_ids:
+            sources = [s for s in sources if s.id in request.source_ids]
+    else:
+        # 使用标准行业分类
+        sources = await db.get_sources(
+            industry=request.industry,
+            enabled_only=True
+        )
+        
+        if request.source_ids:
+            sources = [s for s in sources if s.id in request.source_ids]
     
     if not sources:
+        detail = f"未找到自定义分类 '{category_name}' 的可用信息源" if request.custom_category_id else f"未找到行业 '{request.industry}' 的可用信息源"
         raise HTTPException(
             status_code=404,
-            detail=f"未找到行业 '{request.industry}' 的可用信息源"
+            detail=detail
         )
     
     article_ids = []
@@ -205,7 +246,9 @@ async def fetch_and_analyze(
         from models import AnalysisType
         analysis = await analyzer.analyze(
             articles=articles,
-            analysis_type=AnalysisType.COMPREHENSIVE
+            analysis_type=AnalysisType.COMPREHENSIVE,
+            custom_prompt=custom_prompt,  # 传递自定义提示词
+            industry=None  # 自定义分类时不使用industry
         )
         
         analysis_id = await db.save_analysis(analysis)

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, Edit, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Trash2, Edit, ChevronDown, ChevronRight, Power } from 'lucide-react'
 import { api } from '@/services/api'
 import type { Source } from '@/types/api'
 
@@ -178,9 +178,10 @@ interface SourceItemProps {
   source: Source
   onEdit: () => void
   onDelete: () => void
+  onToggleEnabled: () => void
 }
 
-function SourceItem({ source, onEdit, onDelete }: SourceItemProps) {
+function SourceItem({ source, onEdit, onDelete, onToggleEnabled }: SourceItemProps) {
   return (
     <div className="bg-white p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
       <div className="flex-1">
@@ -206,6 +207,17 @@ function SourceItem({ source, onEdit, onDelete }: SourceItemProps) {
       </div>
 
       <div className="flex items-center gap-2 ml-4">
+        <button
+          onClick={onToggleEnabled}
+          className={`p-2 rounded-lg transition-colors ${
+            source.enabled
+              ? 'text-green-600 hover:bg-green-50'
+              : 'text-gray-400 hover:bg-gray-100'
+          }`}
+          title={source.enabled ? '点击禁用' : '点击启用'}
+        >
+          <Power size={18} />
+        </button>
         <button
           onClick={onEdit}
           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -283,10 +295,35 @@ export default function SourceManager({ sources }: SourceManagerProps) {
     },
   })
 
+  const toggleEnabledMutation = useMutation({
+    mutationFn: ({ source, enabled }: { source: Source; enabled: boolean }) => {
+      // 创建完整的Source对象，只修改enabled字段
+      const updatedSource: Source = {
+        ...source,
+        enabled,
+      }
+      return api.updateSource(source.id!, updatedSource)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sources'] })
+      queryClient.invalidateQueries({ queryKey: ['customCategories'] })
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.detail || '切换状态失败')
+    },
+  })
+
   const handleDelete = (source: Source) => {
     if (confirm(`确定要删除信息源"${source.name}"吗？`)) {
       deleteMutation.mutate(source.id!)
     }
+  }
+
+  const handleToggleEnabled = (source: Source) => {
+    toggleEnabledMutation.mutate({
+      source,
+      enabled: !source.enabled,
+    })
   }
 
   return (
@@ -356,6 +393,7 @@ export default function SourceManager({ sources }: SourceManagerProps) {
                       source={source}
                       onEdit={() => setEditingSource(source)}
                       onDelete={() => handleDelete(source)}
+                      onToggleEnabled={() => handleToggleEnabled(source)}
                     />
                   ))}
                 </div>

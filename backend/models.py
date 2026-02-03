@@ -43,7 +43,21 @@ class IndustryCategory(str, Enum):
     SHOPPING = "shopping"       # 电商购物：淘宝、京东、小红书
     EDUCATION = "education"     # 学习教育：MOOC、知识付费
     LIFESTYLE = "lifestyle"     # 生活方式：美食、旅游、健身
+    CUSTOM = "custom"           # 自定义分类
     OTHER = "other"             # 其他
+
+
+class CustomCategory(BaseModel):
+    """自定义分类模型"""
+    id: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100, description="分类名称")
+    description: Optional[str] = Field(None, max_length=500, description="分类描述")
+    custom_prompt: str = Field(..., min_length=10, description="自定义提示词")
+    source_ids: List[str] = Field(default_factory=list, description="关联的源ID列表")
+    enabled: bool = Field(default=True, description="是否启用")
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    metadata: Optional[dict] = None  # 额外配置
 
 
 class AnalysisType(str, Enum):
@@ -351,11 +365,12 @@ class AnalyzeResponse(BaseModel):
 
 class IntelligenceRequest(BaseModel):
     """一键情报请求"""
-    industry: IndustryCategory
+    industry: Optional[IndustryCategory] = None  # 行业分类，与custom_category_id二选一
+    custom_category_id: Optional[str] = None  # 自定义分类ID，与industry二选一
     hours: int = Field(default=24, ge=1, le=168)
     llm_backend: str = "gemini"
     llm_model: Optional[str] = None
-    source_ids: Optional[List[str]] = None
+    source_ids: Optional[List[str]] = None  # 可选：进一步筛选源
 
 
 class IntelligenceResponse(BaseModel):

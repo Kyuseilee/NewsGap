@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Key, Eye, EyeOff, Check, X, Edit, Trash2 } from 'lucide-react'
 import { api } from '@/services/api'
 import SourceManager from '@/components/SourceManager'
+import { CustomCategoryManager } from '@/components/CustomCategoryManager'
 
 export default function SettingsPage() {
   const { data: sources, isLoading } = useQuery({
@@ -24,6 +25,11 @@ export default function SettingsPage() {
       <section className="mb-12">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">LLM API Key 配置</h2>
         <APIKeyManager />
+      </section>
+
+      {/* 自定义分类管理 */}
+      <section className="mb-12">
+        <CustomCategoryManager />
       </section>
 
       {/* 信息源管理 */}
