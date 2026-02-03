@@ -1,7 +1,7 @@
 """
 HTTP 请求封装
 
-提供统一的 HTTP 请求接口,支持超时、重试等
+提供统一的 HTTP 请求接口,支持超时、重试、代理等
 """
 
 import httpx
@@ -18,11 +18,13 @@ class Fetcher:
         self,
         timeout: int = 15,
         user_agent: str = "NewsGap/0.1.0 (Information Intelligence Tool)",
-        verify_ssl: bool = False  # 默认不验证 SSL，避免证书问题
+        verify_ssl: bool = False,  # 默认不验证 SSL，避免证书问题
+        proxy_url: Optional[str] = None  # 代理URL，格式: 'http://host:port' 或 'socks5://host:port'
     ):
         self.timeout = timeout
         self.user_agent = user_agent
         self.verify_ssl = verify_ssl
+        self.proxy_url = proxy_url
     
     async def fetch(
         self,
@@ -45,10 +47,19 @@ class Fetcher:
             default_headers.update(headers)
         
         try:
+            # 配置代理（如果提供）
+            proxies = None
+            if self.proxy_url:
+                proxies = {
+                    'http://': self.proxy_url,
+                    'https://': self.proxy_url,
+                }
+            
             async with httpx.AsyncClient(
                 timeout=self.timeout,
                 follow_redirects=True,
-                verify=self.verify_ssl
+                verify=self.verify_ssl,
+                proxies=proxies
             ) as client:
                 response = await client.get(url, headers=default_headers)
                 response.raise_for_status()
@@ -75,10 +86,19 @@ class Fetcher:
         if headers:
             default_headers.update(headers)
         
+        # 配置代理（如果提供）
+        proxies = None
+        if self.proxy_url:
+            proxies = {
+                'http://': self.proxy_url,
+                'https://': self.proxy_url,
+            }
+        
         async with httpx.AsyncClient(
             timeout=self.timeout,
             follow_redirects=True,
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            proxies=proxies
         ) as client:
             response = await client.get(url, headers=default_headers)
             response.raise_for_status()
@@ -87,9 +107,18 @@ class Fetcher:
     async def check_url(self, url: str) -> bool:
         """检查 URL 是否可访问"""
         try:
+            # 配置代理（如果提供）
+            proxies = None
+            if self.proxy_url:
+                proxies = {
+                    'http://': self.proxy_url,
+                    'https://': self.proxy_url,
+                }
+            
             async with httpx.AsyncClient(
                 timeout=10,
-                verify=self.verify_ssl
+                verify=self.verify_ssl,
+                proxies=proxies
             ) as client:
                 response = await client.head(url, follow_redirects=True)
                 return response.status_code < 400
