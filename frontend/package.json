@@ -9,6 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/http": "^1.4.1",
+    "@capacitor-community/sqlite": "^8.0.0",
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/filesystem": "^8.1.0",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/preferences": "^8.0.0",
     "@tanstack/react-query": "^5.62.13",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
@@ -17,6 +25,7 @@
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.1.1",
+    "rss-parser": "^3.13.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
