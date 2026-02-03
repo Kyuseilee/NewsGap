@@ -1,0 +1,1251 @@
+# NewsGap 信息源配置文件
+# 所有信息源的集中配置，替代 Python 文件
+
+# ==================== 官方 RSS 源（最高优先级）====================
+official_rss:
+  # 科技媒体
+  - name: "36氪"
+    url: "https://36kr.com/feed"
+    type: "rss"
+    priority: "official_rss"
+    industry: "tech"
+    enabled: true
+
+  - name: "少数派"
+    url: "https://sspai.com/feed"
+    type: "rss"
+    priority: "official_rss"
+    industry: "tech"
+    enabled: true
+
+  - name: "IT之家"
+    url: "https://www.ithome.com/rss/"
+    type: "rss"
+    priority: "official_rss"
+    industry: "tech"
+    enabled: true
+
+  - name: "V2EX"
+    url: "https://v2ex.com/index.xml"
+    type: "rss"
+    priority: "official_rss"
+    industry: "developer"
+    enabled: true
+
+  # 开发者社区
+  - name: "阮一峰的网络日志"
+    url: "https://www.ruanyifeng.com/blog/atom.xml"
+    type: "rss"
+    priority: "official_rss"
+    industry: "developer"
+    enabled: true
+
+  - name: "酷壳 CoolShell"
+    url: "https://coolshell.cn/feed"
+    type: "rss"
+    priority: "official_rss"
+    industry: "developer"
+    enabled: true
+
+  - name: "小众软件"
+    url: "https://feed.appinn.com/"
+    type: "rss"
+    priority: "official_rss"
+    industry: "tech"
+    enabled: true
+
+  # 金融媒体
+  - name: "华尔街日报中文网"
+    url: "https://cn.wsj.com/zh-hans/rss"
+    type: "rss"
+    priority: "official_rss"
+    industry: "finance"
+    enabled: true
+
+  - name: "FT中文网"
+    url: "https://www.ftchinese.com/rss/feed"
+    type: "rss"
+    priority: "official_rss"
+    industry: "finance"
+    enabled: true
+
+  # 社交平台
+  - name: "知乎每日精选"
+    url: "https://www.zhihu.com/rss"
+    type: "rss"
+    priority: "official_rss"
+    industry: "social"
+    enabled: true
+
+  # BBC官方RSS
+  - name: "BBC中文网"
+    url: "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml"
+    type: "rss"
+    priority: "official_rss"
+    industry: "news"
+    enabled: true
+
+
+# ==================== 金融专业源（RSSHub）====================
+finance:
+  # ===== Layer 1: 核心新闻与市场动态（必订，最高权重）=====
+  
+  # 财联社
+  - name: "财联社电报"
+    url: "http://localhost:1200/cls/telegraph"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "全面财经快讯，包括公司/解读等分类"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+
+  - name: "财联社深度"
+    url: "http://localhost:1200/cls/depth"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "深度分析文章"
+      layer: 2
+      quality: "深度洞察"
+
+  # 金十数据
+  - name: "金十数据-重要资讯"
+    url: "http://localhost:1200/jin10/important"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "国内外重要市场新闻（仅重要）"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+
+  - name: "金十数据"
+    url: "http://localhost:1200/jin10"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "7x24小时财经快讯（全量）"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+
+  # 汇通网
+  - name: "汇通网7×24小时快讯"
+    url: "http://localhost:1200/fx678/kx"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "外汇、贵金属等全球市场快讯"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+
+  # 格隆汇
+  - name: "格隆汇实时快讯"
+    url: "http://localhost:1200/gelonghui/live"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "综合市场与公司新闻动态"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+
+  # 财经网
+  - name: "财经网滚动新闻"
+    url: "http://localhost:1200/caijing/roll"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "综合财经新闻滚动更新"
+      update_freq: "高频"
+      layer: 1
+      quality: "核心动态"
+
+  # ===== Layer 2: 深度洞察与数据（重要，高价值分析）=====
+  
+  # 东方财富研究报告
+  - name: "东方财富策略报告"
+    url: "http://localhost:1200/eastmoney/report/strategyreport"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "券商策略研究报告"
+      layer: 2
+      quality: "深度洞察"
+
+  - name: "东方财富宏观研究"
+    url: "http://localhost:1200/eastmoney/report/macresearch"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "宏观经济研究报告"
+      layer: 2
+      quality: "深度洞察"
+
+  - name: "东方财富行业报告"
+    url: "http://localhost:1200/eastmoney/report/industry"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "行业深度研究报告"
+      layer: 2
+      quality: "深度洞察"
+
+  # BigQuant
+  - name: "BigQuant专题报告"
+    url: "http://localhost:1200/bigquant/collections"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "数据驱动专题分析（可用于量化/趋势洞察）"
+      layer: 2
+      quality: "深度洞察"
+
+  # 中国货币网
+  - name: "中国货币网"
+    url: "http://localhost:1200/chinamoney"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "货币市场公告及行情公告"
+      layer: 2
+      quality: "深度洞察"
+
+  # DT财经
+  - name: "DT财经-数据洞察"
+    url: "http://localhost:1200/dtcj/datainsight"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "专业财经数据或洞察文章"
+      layer: 2
+      quality: "深度洞察"
+
+  - name: "DT财经-数据侠"
+    url: "http://localhost:1200/dtcj/datahero"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "数据驱动的财经分析"
+      layer: 2
+      quality: "深度洞察"
+
+  # 乌拉邦
+  - name: "乌拉邦-个股研报"
+    url: "http://localhost:1200/ulapia/reports/stock_research"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "个股深度研究报告"
+      layer: 2
+      quality: "深度洞察"
+
+  - name: "乌拉邦-行业研报"
+    url: "http://localhost:1200/ulapia/reports/industry_research"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "行业研究报告"
+      layer: 2
+      quality: "深度洞察"
+
+  # ===== Layer 3: 市场话题与细分信号（补充，情绪/趋势）=====
+  
+  # 雪球
+  - name: "雪球今日话题"
+    url: "http://localhost:1200/xueqiu/today"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "热门主题与市场话题趋势"
+      layer: 3
+      quality: "市场情绪"
+
+  - name: "雪球热帖"
+    url: "http://localhost:1200/xueqiu/hots"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "雪球社区热门帖子"
+      layer: 3
+      quality: "市场情绪"
+
+  # 淘股吧
+  - name: "淘股吧社区热议"
+    url: "http://localhost:1200/taoguba/blog/252069"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "社区投资者讨论，可作为市场情绪信号"
+      layer: 3
+      quality: "市场情绪"
+      customizable: true
+
+  # 格隆汇热文榜
+  - name: "格隆汇热文榜"
+    url: "http://localhost:1200/gelonghui/hot-article"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "每日最热投资文章"
+      layer: 3
+      quality: "市场话题"
+
+  # ===== 证券交易所官方动态 =====
+  
+  # 北京证券交易所
+  - name: "北京证券交易所"
+    url: "http://localhost:1200/bse"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "北京证券交易所官方新闻/公告"
+      layer: 2
+      quality: "官方公告"
+
+  # 上交所
+  - name: "上交所监管问询"
+    url: "http://localhost:1200/sse/inquire"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "上交所监管问询函"
+      layer: 2
+      quality: "监管动态"
+
+  - name: "上交所科创板"
+    url: "http://localhost:1200/sse/renewal"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "科创板项目动态"
+      layer: 2
+      quality: "官方公告"
+
+  # 深交所
+  - name: "深交所创业板"
+    url: "http://localhost:1200/szse/projectdynamic"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "创业板项目动态"
+      layer: 2
+      quality: "官方公告"
+
+  - name: "深交所监管问询"
+    url: "http://localhost:1200/szse/inquire"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "深交所监管问询函"
+      layer: 2
+      quality: "监管动态"
+
+  # ===== 国际财经观察（Layer 3）=====
+  
+  # Bloomberg
+  - name: "Bloomberg作者动态"
+    url: "http://localhost:1200/bloomberg/authors/ARbTQlRLRjE/matthew-s-levine"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "跟踪特定彭博作者发布的财经洞察"
+      layer: 3
+      quality: "国际视野"
+      customizable: true
+      warning: "严格反爬"
+
+  # Seeking Alpha
+  - name: "Seeking Alpha-市场资讯"
+    url: "http://localhost:1200/seekingalpha/SPY/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "国际证券研究与公司新闻"
+      layer: 3
+      quality: "国际视野"
+      customizable: true
+
+  # Finviz
+  - name: "Finviz市场新闻"
+    url: "http://localhost:1200/finviz"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "全球市场快讯与板块动态"
+      layer: 3
+      quality: "国际视野"
+
+  # ===== 其他补充源 =====
+  
+  # 每经网
+  - name: "每经网突发"
+    url: "http://localhost:1200/nbd"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "每日经济新闻突发"
+      layer: 1
+
+  - name: "每经网原创"
+    url: "http://localhost:1200/nbd/daily"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "每经网精选原创内容"
+      layer: 2
+
+  # 证券时报
+  - name: "证券时报要闻"
+    url: "http://localhost:1200/stcn/yw"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "证券市场要闻"
+      layer: 1
+
+  # 智通财经
+  - name: "智通财经推荐"
+    url: "http://localhost:1200/zhitongcaijing"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "港股美股资讯推荐"
+      layer: 1
+
+  # 巴伦周刊
+  - name: "巴伦周刊中文"
+    url: "http://localhost:1200/barronschina"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "巴伦周刊中文版精选"
+      layer: 3
+
+  # 有知有行
+  - name: "有知有行"
+    url: "http://localhost:1200/youzhiyouxing/materials"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "长期投资教育内容"
+      layer: 3
+
+  # Seeking Alpha个股
+  - name: "Seeking Alpha - 特斯拉"
+    url: "http://localhost:1200/seekingalpha/TSLA/analysis"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: false
+    metadata:
+      description: "特斯拉深度分析"
+      customizable: true
+
+  # 麦肯锡
+  - name: "麦肯锡中国-金融"
+    url: "http://localhost:1200/mckinsey/cn/financial-services"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "麦肯锡金融行业洞察"
+      layer: 2
+
+  # Unusual Whales
+  - name: "Unusual Whales"
+    url: "http://localhost:1200/unusualwhales/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "美股期权异动监测"
+      layer: 3
+
+  # 法布财经
+  - name: "法布财经快讯"
+    url: "http://localhost:1200/fastbull/express-news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "港美股实时快讯"
+      layer: 1
+
+  # AInvest
+  - name: "AInvest文章"
+    url: "http://localhost:1200/ainvest/article"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "AI投资分析文章"
+      layer: 2
+
+  # ===== 央行与监管机构 =====
+  
+  # 中国人民银行
+  - name: "央行工作论文"
+    url: "http://localhost:1200/gov/pbc/gzlw"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "央行工作论文"
+      layer: 2
+      quality: "政策研究"
+
+  - name: "央行公开市场操作"
+    url: "http://localhost:1200/gov/pbc/tradeAnnouncement"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "finance"
+    enabled: true
+    metadata:
+      description: "公开市场操作公告"
+      layer: 1
+      quality: "政策动态"
+
+
+# ==================== 加密货币源 ====================
+crypto:
+  # 金色财经
+  - name: "金色财经-政策"
+    url: "http://localhost:1200/jinse/zhengce"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "加密货币政策动态"
+      layer: 1
+      quality: "核心动态"
+      asset_class: "crypto"
+
+  - name: "金色财经-实时"
+    url: "http://localhost:1200/jinse/lives"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "加密市场实时快讯"
+      update_freq: "实时"
+      layer: 1
+      quality: "核心动态"
+      asset_class: "crypto"
+
+  # 律动 BlockBeats
+  - name: "律动快讯"
+    url: "http://localhost:1200/theblockbeats/newsflash"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "加密货币快讯"
+      layer: 1
+      quality: "核心动态"
+      asset_class: "crypto"
+
+  - name: "律动文章"
+    url: "http://localhost:1200/theblockbeats/article"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "加密货币深度报道"
+      layer: 2
+      quality: "深度洞察"
+      asset_class: "crypto"
+
+  # TokenInsight
+  - name: "TokenInsight研究报告"
+    url: "http://localhost:1200/tokeninsight/report/zh"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "链上数据洞察/研究报告"
+      layer: 2
+      quality: "深度洞察"
+      asset_class: "crypto"
+
+  # Followin
+  - name: "Followin新闻"
+    url: "http://localhost:1200/followin/news/en"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "Web3英文新闻聚合"
+      layer: 1
+      asset_class: "crypto"
+
+  # Paradigm
+  - name: "Paradigm研究"
+    url: "http://localhost:1200/paradigm/writing"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "crypto"
+    enabled: true
+    metadata:
+      description: "Paradigm投资研究"
+      layer: 2
+      asset_class: "crypto"
+
+
+# ==================== 通用信息源（RSSHub）====================
+general:
+  # ===== 社交媒体 Social Media =====
+  - name: "微博热搜榜"
+    url: "http://localhost:1200/weibo/search/hot"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "social"
+    enabled: true
+    metadata:
+      description: "微博实时热搜话题"
+
+  - name: "知乎热榜"
+    url: "http://localhost:1200/zhihu/hotlist"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "social"
+    enabled: true
+    metadata:
+      description: "知乎热门问题"
+
+  - name: "知乎日报"
+    url: "http://localhost:1200/zhihu/daily"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "social"
+    enabled: true
+    metadata:
+      description: "知乎精选文章"
+
+  - name: "即刻主题精选"
+    url: "http://localhost:1200/jike/topic/553870e8e4b0cd50b29f3262"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "social"
+    enabled: true
+    metadata:
+      description: "即刻互联网人主题"
+      customizable: true
+
+  - name: "小红书热榜"
+    url: "http://localhost:1200/xiaohongshu/board/home_feed_trending"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "shopping"
+    enabled: true
+    metadata:
+      description: "小红书热门内容"
+
+  - name: "豆瓣热门话题"
+    url: "http://localhost:1200/douban/group/hot"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "social"
+    enabled: true
+    metadata:
+      description: "豆瓣小组热门话题"
+
+  # ===== 新闻媒体 News =====
+  - name: "联合早报-中港台"
+    url: "http://localhost:1200/zaobao/realtime/china"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "联合早报中港台新闻"
+
+  - name: "联合早报-国际"
+    url: "http://localhost:1200/zaobao/realtime/world"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "联合早报国际新闻"
+
+  - name: "纽约时报中文网"
+    url: "http://localhost:1200/nytimes"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "纽约时报中文版"
+
+  - name: "南方周末"
+    url: "http://localhost:1200/infzm/2"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "南方周末新闻"
+
+  - name: "观察者网"
+    url: "http://localhost:1200/guancha/headline"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "观察者网头条"
+
+  - name: "澎湃新闻-时事"
+    url: "http://localhost:1200/thepaper/channel/25950"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "澎湃新闻时事频道"
+
+  - name: "澎湃新闻-思想"
+    url: "http://localhost:1200/thepaper/channel/25951"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "澎湃新闻思想频道"
+
+  - name: "财新网-要闻"
+    url: "http://localhost:1200/caixin/latest"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "财新网最新要闻"
+
+  - name: "环球时报"
+    url: "http://localhost:1200/huanqiu/index"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "环球时报要闻"
+
+  - name: "中国日报"
+    url: "http://localhost:1200/chinadaily/english/world"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "中国日报英文国际新闻"
+
+  - name: "路透社中文"
+    url: "http://localhost:1200/reuters/china"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "路透社中国频道"
+
+  - name: "美联社-国际"
+    url: "http://localhost:1200/apnews/topics/apf-intlnews"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "美联社国际新闻"
+
+  - name: "卫报-国际版"
+    url: "http://localhost:1200/guardian/international"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "英国卫报国际新闻"
+
+  - name: "经济学人"
+    url: "http://localhost:1200/economist/latest"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "经济学人最新文章"
+
+  - name: "德国之声中文"
+    url: "http://localhost:1200/dw/chinese"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "德国之声中文频道"
+
+  - name: "法国国际广播"
+    url: "http://localhost:1200/rfi/chinese"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "法广中文"
+
+  # ===== 科技媒体 Tech =====
+  - name: "虎嗅网"
+    url: "http://localhost:1200/huxiu/article"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "虎嗅科技资讯"
+
+  - name: "爱范儿"
+    url: "http://localhost:1200/ifanr"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "爱范儿科技新闻"
+
+  - name: "极客公园"
+    url: "http://localhost:1200/geekpark/breakingnews"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "极客公园快讯"
+
+  - name: "品玩"
+    url: "http://localhost:1200/pingwest/status"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "品玩科技快讯"
+
+  - name: "雷锋网"
+    url: "http://localhost:1200/leiphone/newsflash"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "雷锋网快讯"
+
+  - name: "机器之心"
+    url: "http://localhost:1200/jiqizhixin/articles"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "AI/机器学习资讯"
+
+  - name: "量子位"
+    url: "http://localhost:1200/qbitai"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "tech"
+    enabled: true
+    metadata:
+      description: "AI科技媒体"
+
+  # ===== 开发者社区 Developer =====
+  - name: "GitHub Trending"
+    url: "http://localhost:1200/github/trending/daily"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "GitHub每日热门项目"
+
+  - name: "Hacker News"
+    url: "http://localhost:1200/hackernews/best"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "Hacker News最佳"
+
+  - name: "掘金前端"
+    url: "http://localhost:1200/juejin/category/frontend"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "掘金前端文章"
+
+  - name: "掘金后端"
+    url: "http://localhost:1200/juejin/category/backend"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "掘金后端文章"
+
+  - name: "CSDN博客"
+    url: "http://localhost:1200/csdn/blog/phoenix"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "CSDN博客推荐"
+
+  - name: "开源中国"
+    url: "http://localhost:1200/oschina/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "开源中国新闻"
+
+  - name: "Ruby Weekly"
+    url: "http://localhost:1200/rubyweekly"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: false
+    metadata:
+      description: "Ruby周刊"
+
+  - name: "Node Weekly"
+    url: "http://localhost:1200/nodeweekly"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: false
+    metadata:
+      description: "Node.js周刊"
+
+  # ===== 娱乐影视 Entertainment =====
+  - name: "B站全站排行榜"
+    url: "http://localhost:1200/bilibili/ranking/0/0/3"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: true
+    metadata:
+      description: "B站全站日榜"
+
+  - name: "B站影视排行榜"
+    url: "http://localhost:1200/bilibili/ranking/0/181/3"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: true
+    metadata:
+      description: "B站影视区日榜"
+
+  - name: "豆瓣电影即将上映"
+    url: "http://localhost:1200/douban/movie/coming"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: true
+    metadata:
+      description: "豆瓣即将上映"
+
+  - name: "豆瓣电影北美票房榜"
+    url: "http://localhost:1200/douban/movie/ustop"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: true
+    metadata:
+      description: "北美票房"
+
+  - name: "豆瓣音乐新碟榜"
+    url: "http://localhost:1200/douban/music/latest"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: true
+    metadata:
+      description: "豆瓣音乐新碟"
+
+  - name: "网易云音乐歌单"
+    url: "http://localhost:1200/ncm/playlist/3778678"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "entertainment"
+    enabled: false
+    metadata:
+      description: "网易云热门歌单"
+      customizable: true
+
+  # ===== 游戏 Gaming =====
+  - name: "Steam特惠"
+    url: "http://localhost:1200/steam/search/specials=1"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "Steam促销游戏"
+
+  - name: "TapTap热门"
+    url: "http://localhost:1200/taptap/top"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "TapTap热门游戏"
+
+  - name: "游研社"
+    url: "http://localhost:1200/yystv/category/recommend"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游研社推荐"
+
+  - name: "3DM游戏新闻"
+    url: "http://localhost:1200/3dm/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "3DM游戏资讯"
+
+  - name: "PlayStation中国"
+    url: "http://localhost:1200/playstation/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "PlayStation官方新闻"
+
+  # ===== 动漫二次元 Anime =====
+  - name: "Bangumi 番组计划"
+    url: "http://localhost:1200/bangumi/calendar/today"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "anime"
+    enabled: true
+    metadata:
+      description: "今日放送"
+
+  - name: "萌娘百科"
+    url: "http://localhost:1200/moegirl/mainpage"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "anime"
+    enabled: true
+    metadata:
+      description: "萌娘百科首页"
+
+  - name: "AcFun文章"
+    url: "http://localhost:1200/acfun/article"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "anime"
+    enabled: true
+    metadata:
+      description: "AcFun文章区"
+
+  - name: "动漫之家新闻"
+    url: "http://localhost:1200/dmzj/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "anime"
+    enabled: true
+    metadata:
+      description: "动漫之家新闻"
+
+  # ===== 购物电商 Shopping =====
+  - name: "什么值得买"
+    url: "http://localhost:1200/smzdm/ranking/pinlei/11/3"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "shopping"
+    enabled: true
+    metadata:
+      description: "什么值得买好价"
+
+  - name: "淘宝众筹"
+    url: "http://localhost:1200/taobao/zhongchou"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "shopping"
+    enabled: true
+    metadata:
+      description: "淘宝众筹项目"
+
+  - name: "京东众筹"
+    url: "http://localhost:1200/jd/zhongchou"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "shopping"
+    enabled: true
+    metadata:
+      description: "京东众筹项目"
+
+  # ===== 教育学习 Education =====
+  - name: "中国大学MOOC精品课程"
+    url: "http://localhost:1200/icourse163/newest"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "education"
+    enabled: true
+    metadata:
+      description: "中国大学MOOC最新课程"
+
+  - name: "网易公开课精品课程"
+    url: "http://localhost:1200/163/open"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "education"
+    enabled: true
+    metadata:
+      description: "网易公开课"
+
+  - name: "得到每天听本书"
+    url: "http://localhost:1200/dedao/list"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "education"
+    enabled: true
+    metadata:
+      description: "得到App课程"
+
+  # ===== 生活方式 Lifestyle =====
+  - name: "下厨房"
+    url: "http://localhost:1200/xiachufang/popular"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "lifestyle"
+    enabled: true
+    metadata:
+      description: "下厨房热门菜谱"
+
+  - name: "马蜂窝"
+    url: "http://localhost:1200/mafengwo/note"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "lifestyle"
+    enabled: true
+    metadata:
+      description: "马蜂窝游记"
+
+
+# ==================== RSSHub高风险源（低频使用）====================
+high_risk:
+  # 国内新闻媒体（反爬严重）
+  - name: "新华社"
+    url: "https://rsshub.app/xinhuanet/news"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "news"
+    enabled: false
+    metadata:
+      warning: "高风险源，反爬严重，建议使用官方渠道"
+
+  - name: "澎湃新闻（高风险）"
+    url: "https://rsshub.app/thepaper/featured"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "news"
+    enabled: false
+    metadata:
+      warning: "高风险源，建议使用搜索页爬虫"

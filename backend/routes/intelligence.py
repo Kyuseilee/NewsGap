@@ -237,7 +237,7 @@ async def fetch_and_analyze(
             status_code=500,
             detail="无法加载文章数据"
         )
-    print('='*80 + '\n')
+    logger.info("=" * 80)
     
     # 获取 API Key
     api_key = await config_mgr.get_api_key(request.llm_backend)
