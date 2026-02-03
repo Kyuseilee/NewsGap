@@ -109,74 +109,79 @@ export default function ArchivePage() {
   const totalCount = archivedArticles?.total || 0
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">归档管理</h1>
-        <p className="text-gray-600">
-          已归档 {totalCount} 篇文章，按行业分类管理和分析
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-4">归档管理</h1>
+        <p className="text-sm md:text-base text-gray-600">
+          已归档 {totalCount} 篇文章,按行业分类管理和分析
         </p>
       </div>
 
       {/* 分析工具栏 */}
-      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">📊 归档分析</h2>
+      <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4">📊 归档分析</h2>
         
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-700">选择分类：</label>
-            <select
-              value={selectedIndustry}
-              onChange={(e) => setSelectedIndustry(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">全部分类 ({totalCount})</option>
-              {Object.entries(stats).map(([industry, stat]: [string, any]) => (
-                <option key={industry} value={industry}>
-                  {industryNames[industry] || industry} ({stat.count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-gray-700">LLM后端：</label>
-            <select
-              value={llmBackend}
-              onChange={(e) => {
-                setLlmBackend(e.target.value)
-                const backend = backends?.backends?.find((b: any) => b.id === e.target.value)
-                if (backend?.models?.[0]) {
-                  setLlmModel(backend.models[0].id)
-                }
-              }}
-              className="px-3 py-2 border border-gray-300 rounded-lg"
-            >
-              {backends?.backends?.map((backend: any) => (
-                <option key={backend.id} value={backend.id}>
-                  {backend.name}
-                </option>
-              ))}
-            </select>
-
-            {availableModels.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">选择分类</label>
               <select
-                value={llmModel}
-                onChange={(e) => setLlmModel(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg"
+                value={selectedIndustry}
+                onChange={(e) => setSelectedIndustry(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                {availableModels.map((model: any) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
+                <option value="all">全部分类 ({totalCount})</option>
+                {Object.entries(stats).map(([industry, stat]: [string, any]) => (
+                  <option key={industry} value={industry}>
+                    {industryNames[industry] || industry} ({stat.count})
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">LLM后端</label>
+              <select
+                value={llmBackend}
+                onChange={(e) => {
+                  setLlmBackend(e.target.value)
+                  const backend = backends?.backends?.find((b: any) => b.id === e.target.value)
+                  if (backend?.models?.[0]) {
+                    setLlmModel(backend.models[0].id)
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                {backends?.backends?.map((backend: any) => (
+                  <option key={backend.id} value={backend.id}>
+                    {backend.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {availableModels.length > 0 && (
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">模型</label>
+                <select
+                  value={llmModel}
+                  onChange={(e) => setLlmModel(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  {availableModels.map((model: any) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
           </div>
 
           <button
             onClick={handleAnalyzeCategory}
             disabled={currentArticles.length === 0 || analyzeMutation.isPending}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Zap size={18} />
             {analyzeMutation.isPending ? '分析中...' : '分析当前分类'}
@@ -191,20 +196,20 @@ export default function ArchivePage() {
       </div>
 
       {/* 分类统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 md:mb-8">
         {Object.entries(stats).map(([industry, stat]: [string, any]) => (
           <div
             key={industry}
             onClick={() => setSelectedIndustry(industry)}
-            className={`cursor-pointer bg-white rounded-lg border p-6 transition-all hover:shadow-md ${
+            className={`cursor-pointer bg-white rounded-lg border p-4 md:p-6 transition-all hover:shadow-md ${
               selectedIndustry === industry
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200'
             }`}
           >
             <div className="flex items-center gap-3 mb-3">
-              <Folder className="text-blue-600" size={24} />
-              <h3 className="text-lg font-semibold text-gray-900">
+              <Folder className="text-blue-600 flex-shrink-0" size={24} />
+              <h3 className="text-base md:text-lg font-semibold text-gray-900">
                 {industryNames[industry] || industry}
               </h3>
             </div>
@@ -216,7 +221,7 @@ export default function ArchivePage() {
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Calendar size={16} />
-                <span>最新：{new Date(stat.latest).toLocaleDateString('zh-CN')}</span>
+                <span className="truncate">最新：{new Date(stat.latest).toLocaleDateString('zh-CN')}</span>
               </div>
             </div>
           </div>
@@ -224,14 +229,14 @@ export default function ArchivePage() {
       </div>
 
       {/* 当前分类文章列表 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4">
           {selectedIndustry === 'all' ? '全部文章' : `${industryNames[selectedIndustry]} - 文章列表`}
           <span className="ml-2 text-sm text-gray-600">({currentArticles.length} 篇)</span>
         </h2>
 
         {currentArticles.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 text-sm md:text-base">
             该分类下还没有归档文章
           </div>
         ) : (
@@ -239,12 +244,12 @@ export default function ArchivePage() {
             {currentArticles.slice(0, 20).map((article: any) => (
               <div
                 key={article.id}
-                className="border-l-4 border-blue-500 pl-4 py-2 hover:bg-gray-50 transition-colors"
+                className="border-l-4 border-blue-500 pl-3 md:pl-4 py-2 hover:bg-gray-50 transition-colors"
               >
-                <h4 className="font-medium text-gray-900 mb-1">{article.title}</h4>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span>{article.source_name}</span>
-                  <span>·</span>
+                <h4 className="font-medium text-gray-900 mb-1 text-sm md:text-base">{article.title}</h4>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs md:text-sm text-gray-600">
+                  <span className="truncate">{article.source_name}</span>
+                  <span className="hidden sm:inline">·</span>
                   <span>{new Date(article.published_at).toLocaleDateString('zh-CN')}</span>
                 </div>
               </div>

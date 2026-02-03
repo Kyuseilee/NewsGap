@@ -16,9 +16,9 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">设置</h1>
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">设置</h1>
       </div>
 
       {/* 代理配置 */}
@@ -186,7 +186,7 @@ function ProxyConfigManager() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     代理地址
@@ -240,14 +240,14 @@ function ProxyConfigManager() {
           {isConfigured ? (
             <div className="space-y-3">
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">协议:</span>
                     <span className="ml-2 font-medium text-gray-900 uppercase">
                       {proxyConfig.protocol}
                     </span>
                   </div>
-                  <div>
+                  <div className="truncate">
                     <span className="text-gray-500">地址:</span>
                     <span className="ml-2 font-medium text-gray-900">{proxyConfig.host}</span>
                   </div>
@@ -257,17 +257,17 @@ function ProxyConfigManager() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleEdit}
-                  className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  className="flex items-center justify-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                 >
                   <Edit size={16} />
                   修改
                 </button>
                 <button
                   onClick={handleDisable}
-                  className="flex items-center gap-1 px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  className="flex items-center justify-center gap-1 px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                 >
                   <Trash2 size={16} />
                   禁用

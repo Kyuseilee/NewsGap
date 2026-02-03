@@ -13,9 +13,28 @@
 body {
   margin: 0;
   padding: 0;
+  /* 移动端优化 */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* 移动端滚动优化 */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 移动端输入框优化 */
+input, select, textarea, button {
+  font-size: 16px; /* 防止移动端Safari自动缩放 */
+}
+
+@media (min-width: 768px) {
+  input, select, textarea, button {
+    font-size: 14px;
+  }
 }

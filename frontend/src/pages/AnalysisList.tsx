@@ -19,14 +19,14 @@ export default function AnalysisList() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">分析历史</h1>
-        <p className="text-gray-600">查看所有情报分析报告</p>
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 md:mb-4">分析历史</h1>
+        <p className="text-sm md:text-base text-gray-600">查看所有情报分析报告</p>
       </div>
 
       {(!analyses || analyses.length === 0) ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-8 md:p-12 text-center">
           <TrendingUp className="mx-auto mb-4 text-gray-400" size={48} />
           <p className="text-gray-600 mb-2">还没有分析报告</p>
           <p className="text-sm text-gray-500">
@@ -45,35 +45,36 @@ export default function AnalysisList() {
             <div
               key={analysis.id}
               onClick={() => navigate(`/analysis/${analysis.id}`)}
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all"
+              className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <div className="flex flex-col sm:flex-row items-start justify-between mb-3 gap-2">
+                <div className="flex-1 w-full">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
                     {analysis.executive_brief ? analysis.executive_brief.substring(0, 80) + '...' : '情报分析报告'}
                   </h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs md:text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <Clock size={16} />
-                      {new Date(analysis.created_at).toLocaleString('zh-CN')}
+                      <span className="hidden sm:inline">{new Date(analysis.created_at).toLocaleString('zh-CN')}</span>
+                      <span className="sm:hidden">{new Date(analysis.created_at).toLocaleDateString('zh-CN')}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <FileText size={16} />
                       {analysis.article_ids?.length || 0} 篇文章
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 truncate">
                       <Sparkles size={16} />
-                      {analysis.llm_model}
+                      <span className="truncate">{analysis.llm_model}</span>
                     </span>
                   </div>
                 </div>
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs md:text-sm whitespace-nowrap">
                   {analysis.analysis_type}
                 </span>
               </div>
 
               {analysis.markdown_report && (
-                <div className="text-sm text-gray-700 line-clamp-2 bg-gray-50 p-3 rounded">
+                <div className="text-xs md:text-sm text-gray-700 line-clamp-2 bg-gray-50 p-3 rounded">
                   {analysis.markdown_report.substring(0, 150)}...
                 </div>
               )}

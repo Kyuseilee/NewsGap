@@ -162,42 +162,42 @@ export default function ArticlesPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       {/* 头部 */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">文章列表</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">文章列表</h1>
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <RefreshCw size={16} />
-            刷新
+            <span className="hidden sm:inline">刷新</span>
           </button>
         </div>
         
         {/* 统计卡片 */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-sm text-gray-600 mb-1">总文章数</div>
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+            <div className="text-xs md:text-sm text-gray-600 mb-1">总文章数</div>
+            <div className="text-xl md:text-2xl font-bold text-gray-900">{stats.total}</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-sm text-gray-600 mb-1">未归档</div>
-            <div className="text-2xl font-bold text-blue-600">{stats.notArchived}</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+            <div className="text-xs md:text-sm text-gray-600 mb-1">未归档</div>
+            <div className="text-xl md:text-2xl font-bold text-blue-600">{stats.notArchived}</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-sm text-gray-600 mb-1">已归档</div>
-            <div className="text-2xl font-bold text-green-600">{stats.archived}</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+            <div className="text-xs md:text-sm text-gray-600 mb-1">已归档</div>
+            <div className="text-xl md:text-2xl font-bold text-green-600">{stats.archived}</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-sm text-gray-600 mb-1">当前显示</div>
-            <div className="text-2xl font-bold text-purple-600">{stats.filtered}</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4">
+            <div className="text-xs md:text-sm text-gray-600 mb-1">当前显示</div>
+            <div className="text-xl md:text-2xl font-bold text-purple-600">{stats.filtered}</div>
           </div>
         </div>
         
         {selectedArticles.length > 0 && (
-          <div className="mt-4 text-blue-600 font-medium">
+          <div className="mt-4 text-sm md:text-base text-blue-600 font-medium">
             已选择 {selectedArticles.length} 篇文章
           </div>
         )}
@@ -276,74 +276,82 @@ export default function ArticlesPage() {
       {/* 批量操作工具栏 */}
       {filteredArticles.length > 0 && (
         <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <button
-              onClick={handleToggleAll}
-              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-            >
-              {selectedArticles.length === filteredArticles.length ? '取消全选' : '全选当前页'}
-            </button>
-
-            <div className="flex-1 flex items-center gap-3">
-              <select
-                value={llmBackend}
-                onChange={(e) => {
-                  setLlmBackend(e.target.value)
-                  const backend = backends?.backends?.find((b: any) => b.id === e.target.value)
-                  if (backend?.models?.[0]) {
-                    setLlmModel(backend.models[0].id)
-                  }
-                }}
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg"
+          <div className="flex flex-col gap-3">
+            {/* 第一行：全选和LLM选择 */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                onClick={handleToggleAll}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
               >
-                {backends?.backends?.map((backend: any) => (
-                  <option key={backend.id} value={backend.id}>
-                    {backend.name}
-                  </option>
-                ))}
-              </select>
+                {selectedArticles.length === filteredArticles.length ? '取消全选' : '全选当前页'}
+              </button>
 
-              {availableModels.length > 0 && (
+              <div className="flex-1 flex flex-col sm:flex-row items-stretch gap-3">
                 <select
-                  value={llmModel}
-                  onChange={(e) => setLlmModel(e.target.value)}
+                  value={llmBackend}
+                  onChange={(e) => {
+                    setLlmBackend(e.target.value)
+                    const backend = backends?.backends?.find((b: any) => b.id === e.target.value)
+                    if (backend?.models?.[0]) {
+                      setLlmModel(backend.models[0].id)
+                    }
+                  }}
                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg"
                 >
-                  {availableModels.map((model: any) => (
-                    <option key={model.id} value={model.id}>
-                      {model.name}
+                  {backends?.backends?.map((backend: any) => (
+                    <option key={backend.id} value={backend.id}>
+                      {backend.name}
                     </option>
                   ))}
                 </select>
-              )}
+
+                {availableModels.length > 0 && (
+                  <select
+                    value={llmModel}
+                    onChange={(e) => setLlmModel(e.target.value)}
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                  >
+                    {availableModels.map((model: any) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
 
-            <button
-              onClick={handleAnalyze}
-              disabled={selectedArticles.length === 0 || analyzeMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {analyzeMutation.isPending ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  正在分析 {selectedArticles.length} 篇文章...
-                </>
-              ) : (
-                <>
-                  <Zap size={18} />
-                  分析选中文章 ({selectedArticles.length})
-                </>
-              )}
-            </button>
+            {/* 第二行：操作按钮 */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleAnalyze}
+                disabled={selectedArticles.length === 0 || analyzeMutation.isPending}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
+              >
+                {analyzeMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <span className="hidden sm:inline">正在分析 {selectedArticles.length} 篇文章...</span>
+                    <span className="sm:hidden">分析中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={18} />
+                    <span className="hidden sm:inline">分析选中文章 ({selectedArticles.length})</span>
+                    <span className="sm:hidden">分析 ({selectedArticles.length})</span>
+                  </>
+                )}
+              </button>
 
-            <button
-              onClick={handleArchive}
-              disabled={selectedArticles.length === 0 || archiveMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Archive size={18} />
-              {archiveMutation.isPending ? '归档中...' : '归档选中文章'}
-            </button>
+              <button
+                onClick={handleArchive}
+                disabled={selectedArticles.length === 0 || archiveMutation.isPending}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                <Archive size={18} />
+                {archiveMutation.isPending ? '归档中...' : '归档选中文章'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -383,35 +391,36 @@ export default function ArticlesPage() {
                   type="checkbox"
                   checked={selectedArticles.includes(article.id!)}
                   onChange={() => handleToggleArticle(article.id!)}
-                  className="mt-1 w-5 h-5 text-blue-600 rounded"
+                  className="mt-1 w-5 h-5 text-blue-600 rounded flex-shrink-0"
                 />
 
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 flex-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-2 gap-2">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 flex-1">
                       {article.title}
                     </h3>
                     <a
                       href={article.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-4 text-blue-600 hover:text-blue-700"
+                      className="flex-shrink-0 text-blue-600 hover:text-blue-700"
                     >
                       <ExternalLink size={18} />
                     </a>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3 flex-wrap">
-                    <span>来源：{article.source_name}</span>
-                    <span>·</span>
-                    <span>{new Date(article.published_at).toLocaleString('zh-CN')}</span>
-                    <span>·</span>
+                  <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-600 mb-3 flex-wrap">
+                    <span className="truncate">来源：{article.source_name}</span>
+                    <span className="hidden sm:inline">·</span>
+                    <span className="hidden sm:inline">{new Date(article.published_at).toLocaleString('zh-CN')}</span>
+                    <span className="sm:hidden text-xs">{new Date(article.published_at).toLocaleDateString('zh-CN')}</span>
+                    <span className="hidden sm:inline">·</span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
                       {article.industry}
                     </span>
                     {article.archived && (
                       <>
-                        <span>·</span>
+                        <span className="hidden sm:inline">·</span>
                         <span className="flex items-center gap-1 text-green-600">
                           <Check size={14} />
                           已归档

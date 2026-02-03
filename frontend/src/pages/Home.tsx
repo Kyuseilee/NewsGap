@@ -122,19 +122,19 @@ export default function HomePage() {
   const isLoading = fetchMutation.isPending || intelligenceMutation.isPending
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <div className="max-w-4xl mx-auto py-6 md:py-12 px-4 md:px-6">
+      <div className="text-center mb-8 md:mb-12">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2 md:mb-4">
           NewsGap 信息差情报工具
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-base md:text-lg text-gray-600">
           自动收集、归档和分析行业信息，快速把握关键趋势
         </p>
       </div>
 
       {/* 配置面板 */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">配置参数</h2>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-8 mb-6 md:mb-8">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-4 md:mb-6">配置参数</h2>
         
         <div className="space-y-6">
           {/* 分类模式选择 */}
@@ -142,7 +142,7 @@ export default function HomePage() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               分类模式
             </label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setCategoryMode('industry')}
                 className={`flex-1 px-4 py-2 rounded-lg border-2 transition-all ${
@@ -242,12 +242,12 @@ export default function HomePage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               时间范围
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 sm:flex gap-2">
               {[12, 24, 48, 72, 168].map((h) => (
                 <button
                   key={h}
                   onClick={() => setHours(h)}
-                  className={`flex-1 px-4 py-2 rounded-lg border transition-all ${
+                  className={`flex-1 px-3 md:px-4 py-2 rounded-lg border transition-all text-sm md:text-base ${
                     hours === h
                       ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -301,7 +301,7 @@ export default function HomePage() {
           )}
 
           {/* 操作按钮 */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button
               onClick={handleFetchOnly}
               disabled={isLoading}
