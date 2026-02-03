@@ -1,6 +1,6 @@
 import ReactMarkdown from 'react-markdown'
 import { ExternalLink } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { Article } from '@/types/api'
 import type { ReactNode } from 'react'
 
@@ -30,35 +30,33 @@ function extractTextFromChildren(children: ReactNode): string {
 
 /**
  * 解析Markdown中的文章引用并渲染为可点击链接
- * 支持格式：[[1]]、[[2]] 等
+ * 支持格式：[1]、[2] 等（单方括号，匹配AI输出格式）
+ * 注意：需要排除Markdown链接格式 [文字](url)
  */
 export default function AnalysisMarkdown({ content, articles }: AnalysisMarkdownProps) {
   const [hoveredRef, setHoveredRef] = useState<number | null>(null)
 
-  // 从Markdown中提取引用索引到文章的映射
-  // 查找类似 "[[1]] 文章标题" 的模式
-  const parseArticleReferences = (): Map<number, Article> => {
-    const refMap = new Map<number, Article>()
+  // 使用 useMemo 缓存引用映射，避免每次渲染都重新计算
+  const refMap = useMemo(() => {
+    const map = new Map<number, Article>()
     
-    // 正则匹配 [[数字]] 格式
-    const refPattern = /\[\[(\d+)\]\]/g
+    // 正则匹配 [数字] 格式，但排除后面跟着 ( 的情况（Markdown链接）
+    const refPattern = /\[(\d+)\](?!\()/g
     let match
     const usedIndices = new Set<number>()
     
     while ((match = refPattern.exec(content)) !== null) {
       const index = parseInt(match[1], 10)
       if (!usedIndices.has(index) && index > 0 && index <= articles.length) {
-        refMap.set(index, articles[index - 1])  // 转换为0-based索引
+        map.set(index, articles[index - 1])  // 转换为0-based索引
         usedIndices.add(index)
       }
     }
     
-    return refMap
-  }
+    return map
+  }, [content, articles])
 
-  const refMap = parseArticleReferences()
-
-  // 自定义渲染器：将 [[1]] 替换为可点击的链接
+  // 自定义渲染器：将 [1] 替换为可点击的链接
   const processContent = (children: ReactNode): ReactNode => {
     const text = extractTextFromChildren(children)
     
@@ -67,7 +65,8 @@ export default function AnalysisMarkdown({ content, articles }: AnalysisMarkdown
     }
     
     const parts: ReactNode[] = []
-    const refPattern = /\[\[(\d+)\]\]/g
+    // 匹配 [数字] 但排除 Markdown 链接格式
+    const refPattern = /\[(\d+)\](?!\()/g
     let lastIndex = 0
     let match
 
@@ -88,7 +87,7 @@ export default function AnalysisMarkdown({ content, articles }: AnalysisMarkdown
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded border border-blue-200 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded border border-blue-200 transition-colors text-sm font-medium no-underline"
             onMouseEnter={() => setHoveredRef(index)}
             onMouseLeave={() => setHoveredRef(null)}
             title={`${article.title}\n来源：${article.source_name}\n点击查看原文`}
@@ -101,7 +100,7 @@ export default function AnalysisMarkdown({ content, articles }: AnalysisMarkdown
         )
       } else {
         // 如果找不到对应的文章，保持原样
-        parts.push(`[[${index}]]`)
+        parts.push(`[${index}]`)
       }
 
       lastIndex = match.index + match[0].length
@@ -171,48 +170,6 @@ export default function AnalysisMarkdown({ content, articles }: AnalysisMarkdown
       >
         {content}
       </ReactMarkdown>
-
-      {/* 文章引用索引表（如果存在引用） */}
-      {refMap.size > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">📚 引用文章</h3>
-          <div className="space-y-2">
-            {Array.from(refMap.entries())
-              .sort((a, b) => a[0] - b[0])
-              .map(([index, article]) => (
-                <div
-                  key={article.id}
-                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-700 rounded font-semibold text-sm">
-                    {index}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <a
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium block truncate"
-                    >
-                      {article.title}
-                    </a>
-                    <div className="text-sm text-gray-500 mt-1">
-                      来源：{article.source_name} · {new Date(article.published_at).toLocaleString('zh-CN')}
-                    </div>
-                  </div>
-                  <a
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    <ExternalLink size={18} />
-                  </a>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

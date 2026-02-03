@@ -183,6 +183,7 @@ CREATE TABLE IF NOT EXISTS analyses (
     
     -- 分析结果（JSON 存储）
     executive_brief TEXT NOT NULL,
+    markdown_report TEXT,  -- 完整的Markdown报告（无长度限制）
     trends TEXT,  -- JSON array
     signals TEXT,  -- JSON array
     information_gaps TEXT,  -- JSON array

@@ -53,7 +53,7 @@ class DeepSeekAdapter(BaseLLMAdapter):
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            max_tokens=8000  # 设置足够大的输出长度，避免截断
+            max_tokens=64000  # DeepSeek-V3 支持最大64K输出tokens
         )
         
         processing_time = (datetime.now() - start_time).total_seconds()

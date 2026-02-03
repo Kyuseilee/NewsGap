@@ -193,9 +193,22 @@ async def fetch_and_analyze(
     logger.info('='*80 + '\n')
     
     if not article_ids:
+        # 提供详细的错误信息
+        error_details = {
+            "message": "未能从任何信息源获取到文章",
+            "sources_attempted": fetch_summary['total_sources'],
+            "sources_failed": fetch_summary['failed_sources'],
+            "suggestion": "请检查信息源配置或稍后重试"
+        }
+        
+        if request.custom_category_id:
+            error_details["category"] = category_name
+        else:
+            error_details["industry"] = request.industry.value if request.industry else None
+        
         raise HTTPException(
             status_code=404,
-            detail="未爬取到任何文章"
+            detail=error_details
         )
     
     # 第二步：分析 - 确保使用本次爬取的文章

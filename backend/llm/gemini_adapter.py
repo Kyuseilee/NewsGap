@@ -34,17 +34,19 @@ class GeminiAdapter(BaseLLMAdapter):
         # 配置 Google GenAI
         genai.configure(api_key=self.api_key)
         
-        # Gemini 2.5 Flash支持最多8192输出tokens
+        # Gemini 2.5 Flash支持最多65536输出tokens（官方文档confirmed）
         # 设置candidate_count=1确保生成完整单一候选
         self.client = genai.GenerativeModel(
             model_name=self.model,
             generation_config=genai.GenerationConfig(
                 temperature=0.3,
-                max_output_tokens=8192,  # Gemini 2.5 Flash的最大输出token
+                max_output_tokens=65536,  # Gemini 2.5 Flash的真实最大输出token限制
                 candidate_count=1,  # 只生成1个候选，避免分散token
                 stop_sequences=None,  # 不设置停止序列，让模型完整输出
             )
         )
+        
+        logger.info(f"Gemini 适配器初始化完成: {self.model}, max_output_tokens=65536")
     
     async def analyze(
         self,
@@ -81,8 +83,19 @@ class GeminiAdapter(BaseLLMAdapter):
             
             response_text = response.text
             
+            # 检查finish_reason，确保响应完整
+            finish_reason = None
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'finish_reason'):
+                    finish_reason = candidate.finish_reason
+            
             # 记录完整响应到日志
             logger.info(f"Gemini 响应长度: {len(response_text)} 字符")
+            logger.info(f"Finish reason: {finish_reason}")
+            if finish_reason and finish_reason != 1:  # 1 = STOP (正常结束)
+                logger.warning(f"⚠️ Gemini 响应未正常结束！Finish reason: {finish_reason}")
+                logger.warning("可能原因：1) 达到max_output_tokens限制 2) 触发安全过滤 3) 其他限制")
             logger.debug(f"Gemini 完整响应:\n{response_text}")
             
             # 写入日志文件

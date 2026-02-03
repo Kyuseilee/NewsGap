@@ -51,7 +51,7 @@ class OllamaAdapter(BaseLLMAdapter):
                     "prompt": f"{system_prompt}\n\n{user_prompt}",
                     "stream": False,
                     "options": {
-                        "num_predict": 8000  # 设置最大输出长度，避免截断
+                        "num_predict": 32000  # Ollama模型输出限制，设置足够大以避免截断
                     }
                 }
             )

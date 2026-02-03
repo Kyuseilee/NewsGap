@@ -50,7 +50,7 @@ class OpenAIAdapter(BaseLLMAdapter):
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            max_tokens=8000  # 设置足够大的输出长度，避免截断
+            max_tokens=16000  # GPT-4o 支持最大16K输出tokens（保守设置）
         )
         
         processing_time = (datetime.now() - start_time).total_seconds()

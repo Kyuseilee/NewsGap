@@ -79,6 +79,15 @@ export default function HomePage() {
       // 使用通配符匹配所有articles查询
       queryClient.invalidateQueries({ queryKey: ['articles'], refetchType: 'all' })
     },
+    onError: (error: any) => {
+      // 处理404和其他错误
+      if (error.response?.status === 404) {
+        alert('❌ 未能获取到文章\n\n可能原因：\n• 本地 RSSHub 服务未启动\n• 信息源暂时不可用\n• 该分类下没有可用的信息源\n\n请检查 RSSHub 服务状态或稍后重试')
+      } else {
+        const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+        alert(`❌ 爬取失败：${errorMsg}`)
+      }
+    },
   })
 
   const intelligenceMutation = useMutation({
@@ -90,6 +99,16 @@ export default function HomePage() {
       // 自动跳转到分析报告详情页面
       if (data.analysis_id) {
         navigate(`/analysis/${data.analysis_id}`)
+      }
+    },
+    onError: (error: any) => {
+      // 处理404错误
+      if (error.response?.status === 404) {
+        alert('❌ 未能获取到文章\n\n可能原因：\n• 本地 RSSHub 服务未启动\n• 信息源暂时不可用\n• 该分类下没有可用的信息源\n\n请检查 RSSHub 服务状态或稍后重试')
+      } else {
+        // 其他错误
+        const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+        alert(`❌ 操作失败：${errorMsg}`)
       }
     },
   })
