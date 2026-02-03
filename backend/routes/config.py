@@ -273,3 +273,74 @@ async def set_rsshub_instance(
         'message': f'RSSHub 实例已设置为: {instance_url}'
     }
 
+
+# 代理配置管理
+class ProxyConfigRequest(BaseModel):
+    enabled: bool
+    host: str = ""
+    port: int = 0
+    protocol: str = "http"  # 'http' or 'socks5'
+
+
+@router.get("/proxy")
+async def get_proxy_config(
+    config_mgr: ConfigManager = Depends(get_config_manager)
+):
+    """获取代理配置"""
+    config = await config_mgr.get_proxy_config()
+    if not config:
+        config = {
+            'enabled': False,
+            'host': '',
+            'port': 0,
+            'protocol': 'http'
+        }
+    return config
+
+
+@router.post("/proxy")
+async def set_proxy_config(
+    request: ProxyConfigRequest,
+    config_mgr: ConfigManager = Depends(get_config_manager)
+):
+    """设置代理配置"""
+    if request.enabled and (not request.host or request.port <= 0):
+        raise HTTPException(
+            status_code=400,
+            detail="启用代理时必须提供有效的主机地址和端口"
+        )
+    
+    proxy_config = {
+        'enabled': request.enabled,
+        'host': request.host,
+        'port': request.port,
+        'protocol': request.protocol
+    }
+    
+    await config_mgr.set_proxy_config(proxy_config)
+    
+    return {
+        'success': True,
+        'message': '代理配置已保存',
+        'config': proxy_config
+    }
+
+
+@router.delete("/proxy")
+async def delete_proxy_config(
+    config_mgr: ConfigManager = Depends(get_config_manager)
+):
+    """删除/禁用代理配置"""
+    proxy_config = {
+        'enabled': False,
+        'host': '',
+        'port': 0,
+        'protocol': 'http'
+    }
+    await config_mgr.set_proxy_config(proxy_config)
+    
+    return {
+        'success': True,
+        'message': '代理配置已禁用'
+    }
+

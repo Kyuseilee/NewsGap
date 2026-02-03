@@ -61,11 +61,15 @@ async def analyze_articles(
             detail=f"使用 {request.llm_backend.upper()} 需要先在设置页面配置 API Key"
         )
     
+    # 获取代理配置
+    proxy_url = await config_mgr.get_proxy_url()
+    
     # 创建分析器
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
         api_key=api_key,
-        model=request.llm_model  # 传递用户选择的模型
+        model=request.llm_model,  # 传递用户选择的模型
+        proxy_url=proxy_url
     )
     
     # 执行分析

@@ -16,8 +16,12 @@ from crawler.fetcher import Fetcher
 class RSSParser:
     """RSS/Atom feed 解析器"""
     
-    def __init__(self):
-        self.fetcher = Fetcher()
+    def __init__(self, fetcher: Fetcher = None):
+        """
+        Args:
+            fetcher: HTTP请求器实例，如果不提供则创建新实例
+        """
+        self.fetcher = fetcher if fetcher else Fetcher()
     
     async def parse(
         self,

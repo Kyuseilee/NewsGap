@@ -14,10 +14,14 @@ from crawler.extractor import ContentExtractor
 class CrawlerService(CrawlerInterface):
     """爬虫服务"""
     
-    def __init__(self):
-        self.fetcher = Fetcher()
-        self.rss_parser = RSSParser()
-        self.extractor = ContentExtractor()
+    def __init__(self, proxy_url: str = None):
+        """
+        Args:
+            proxy_url: 代理URL，格式: 'http://host:port' 或 'socks5://host:port'
+        """
+        self.fetcher = Fetcher(proxy_url=proxy_url)
+        self.rss_parser = RSSParser(fetcher=self.fetcher)
+        self.extractor = ContentExtractor(fetcher=self.fetcher)
     
     async def fetch(
         self,

@@ -99,6 +99,7 @@ app = FastAPI(
 )
 
 # CORS 配置（允许前端访问）
+# 支持 WSL 环境：允许从 Windows 通过 WSL IP 访问
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -106,7 +107,9 @@ app.add_middleware(
         "http://localhost:1420",      # Tauri 默认端口
         "tauri://localhost",
         "http://127.0.0.1:5173",
+        "http://*.local:5173",        # 本地网络
     ],
+    allow_origin_regex=r"http://.*:5173",  # 允许任何IP的5173端口访问（支持WSL IP）
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -140,4 +143,6 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+    # 绑定到 0.0.0.0 使得 WSL 可以从 Windows 访问
+    # Windows 可以通过 WSL IP 地址访问（如 172.x.x.x:8000）
     uvicorn.run(app, host="0.0.0.0", port=8000)
