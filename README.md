@@ -23,6 +23,7 @@
 - **📊 主线聚合** - 自动识别核心叙事，避免信息过载
 - **💾 本地优先** - SQLite + Markdown，数据完全自主可控
 - **🖥️ Web UI** - React + FastAPI 现代化应用
+- **📱 移动端支持** - 完整的响应式设计，支持手机、平板访问
 
 ## 🏗️ 系统架构
 
@@ -51,6 +52,7 @@ NewsGap/
 - **Python**: 3.10+
 - **Node.js**: 18+
 - **系统**: macOS/Linux/Windows
+- **浏览器**: Chrome/Safari/Firefox 最新版（支持移动端浏览器）
 
 ### 一键部署（推荐）
 
@@ -71,7 +73,44 @@ export DEEPSEEK_API_KEY="sk-your-deepseek-key"    # 性价比高
 ./start.sh
 
 # 5. 访问应用
+# 桌面端
 open http://localhost:5173
+# 移动端（手机/平板）
+# 确保设备与电脑在同一局域网，访问：
+# http://[你的电脑IP]:5173
+```
+
+### 移动端访问设置
+
+**获取电脑 IP 地址：**
+
+```bash
+# macOS/Linux
+ifconfig | grep "inet "
+# 或
+ipconfig getifaddr en0  # Wi-Fi
+ipconfig getifaddr en1  # 有线
+
+# Windows
+ipconfig
+```
+
+**示例：**
+- 电脑 IP: `192.168.1.100`
+- 手机浏览器访问: `http://192.168.1.100:5173`
+
+**启用网络访问：**
+
+如果移动端无法访问，需要修改 Vite 配置：
+
+```bash
+# 方式 1: 临时启用（推荐）
+cd frontend
+npm run dev -- --host
+
+# 方式 2: 永久配置
+# 编辑 frontend/vite.config.ts
+# 在 server 中添加: host: '0.0.0.0'
 ```
 
 ### 手动部署
@@ -118,10 +157,17 @@ npm run dev
 
 ### 验证部署
 
-1. 打开 `http://localhost:5173`
-2. 选择行业类别（如"科技"）
-3. 点击"一键情报"
-4. 等待 10-30 秒查看生成的情报报告
+1. **桌面端**: 打开 `http://localhost:5173`
+2. **移动端**: 打开 `http://[电脑IP]:5173` (如 `http://192.168.1.100:5173`)
+3. 选择行业类别（如"科技"）
+4. 点击"一键情报"
+5. 等待 10-30 秒查看生成的情报报告
+
+**移动端体验优化：**
+- ✅ 响应式导航菜单（汉堡菜单）
+- ✅ 触摸优化的按钮和表单
+- ✅ 适配手机和平板的布局
+- ✅ 横屏和竖屏自动适应
 
 ## 📖 使用指南
 
@@ -233,14 +279,17 @@ tail -f logs/frontend.log
 - **React 18 + TypeScript** - UI 框架
 - **Vite** - 构建工具
 - **TanStack Query** - 数据获取
-- **Tailwind CSS** - 样式框架
+- **Tailwind CSS** - 样式框架（支持响应式设计）
 - **Zustand** - 状态管理
+- **React Router** - 路由管理
+- **Lucide React** - 图标库
 
 ## 📚 文档
 
 - [架构设计](docs/architecture.md) - 系统架构和设计原则
 - [API 文档](docs/api.md) - 完整的 API 参考
 - [LLM 集成](docs/llm-integration.md) - LLM 后端配置指南
+- [移动端支持](docs/mobile-support.md) - 移动端适配说明和最佳实践
 - [配置系统](backend/config/README.md) - 信息源配置管理
 - [历史文档](docs/archive/README.md) - 项目开发历史文档归档
 
@@ -281,12 +330,16 @@ export HTTP_PROXY=http://your-proxy:port
 - [x] 决策导向 Prompt
 - [x] Web UI
 - [x] 本地存储
+- [x] 移动端响应式支持
+- [x] 自定义分类和信息源管理
+- [x] 网络代理配置
 
 ### 🚧 v0.2（进行中）
 - [ ] 报告质量评分
 - [ ] 历史报告对比
 - [ ] 导出功能（PDF/Markdown）
-- [ ] 自定义分类增强
+- [ ] PWA 支持（离线访问）
+- [ ] 性能优化（懒加载、代码分割）
 
 ### 🔮 v0.3（计划中）
 - [ ] 信号追踪看板

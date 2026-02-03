@@ -12,10 +12,24 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: '0.0.0.0', // 允许局域网访问（移动端开发）
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+        },
       },
     },
   },
