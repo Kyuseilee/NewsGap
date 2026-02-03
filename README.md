@@ -241,7 +241,8 @@ tail -f logs/frontend.log
 - [架构设计](docs/architecture.md) - 系统架构和设计原则
 - [API 文档](docs/api.md) - 完整的 API 参考
 - [LLM 集成](docs/llm-integration.md) - LLM 后端配置指南
-- [快速开始](QUICK_START.md) - 详细的部署指南
+- [配置系统](backend/config/README.md) - 信息源配置管理
+- [历史文档](docs/archive/README.md) - 项目开发历史文档归档
 
 ## 🐛 故障排查
 
