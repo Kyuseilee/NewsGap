@@ -10,6 +10,12 @@
 
 [快速开始](#-快速开始) • [核心特性](#-核心特性) • [使用文档](#-使用指南) • [开发文档](docs/)
 
+---
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Kyuseilee/NewsGap&type=Date)](https://star-history.com/#Kyuseilee/NewsGap&Date)
+
 </div>
 
 ---
