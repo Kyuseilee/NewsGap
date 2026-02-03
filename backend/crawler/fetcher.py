@@ -19,12 +19,26 @@ class Fetcher:
         timeout: int = 15,
         user_agent: str = "NewsGap/0.1.0 (Information Intelligence Tool)",
         verify_ssl: bool = False,  # 默认不验证 SSL，避免证书问题
-        proxy_url: Optional[str] = None  # 代理URL，格式: 'http://host:port' 或 'socks5://host:port'
+        proxy_url: Optional[str] = None,  # 旧版代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'
+        proxy_config: Optional[dict] = None  # 新版代理配置，格式: {'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
     ):
         self.timeout = timeout
         self.user_agent = user_agent
         self.verify_ssl = verify_ssl
-        self.proxy_url = proxy_url
+        # For backward compatibility, if proxy_config is not provided but proxy_url is, convert it
+        if proxy_config is None and proxy_url is not None:
+            # Convert single proxy URL to config format (put it in the appropriate slot based on URL scheme)
+            if proxy_url.startswith('http://'):
+                self.proxy_config = {'http': proxy_url, 'https': None, 'socks5': None}
+            elif proxy_url.startswith('https://'):
+                self.proxy_config = {'http': None, 'https': proxy_url, 'socks5': None}
+            elif proxy_url.startswith('socks5://'):
+                self.proxy_config = {'http': None, 'https': None, 'socks5': proxy_url}
+            else:
+                # Default to http if no scheme specified
+                self.proxy_config = {'http': proxy_url, 'https': None, 'socks5': None}
+        else:
+            self.proxy_config = proxy_config or {}
     
     async def fetch(
         self,
@@ -49,12 +63,20 @@ class Fetcher:
         try:
             # 配置代理（如果提供）
             proxies = None
-            if self.proxy_url:
-                proxies = {
-                    'http://': self.proxy_url,
-                    'https://': self.proxy_url,
-                }
-            
+            if self.proxy_config:
+                proxies = {}
+                # 添加各个协议的代理配置
+                if 'http' in self.proxy_config and self.proxy_config['http']:
+                    proxies['http://'] = self.proxy_config['http']
+                if 'https' in self.proxy_config and self.proxy_config['https']:
+                    proxies['https://'] = self.proxy_config['https']
+                if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
+                    # SOCKS5代理可以同时处理HTTP和HTTPS请求
+                    if 'http://' not in proxies:
+                        proxies['http://'] = self.proxy_config['socks5']
+                    if 'https://' not in proxies:
+                        proxies['https://'] = self.proxy_config['socks5']
+
             async with httpx.AsyncClient(
                 timeout=self.timeout,
                 follow_redirects=True,
@@ -88,12 +110,20 @@ class Fetcher:
         
         # 配置代理（如果提供）
         proxies = None
-        if self.proxy_url:
-            proxies = {
-                'http://': self.proxy_url,
-                'https://': self.proxy_url,
-            }
-        
+        if self.proxy_config:
+            proxies = {}
+            # 添加各个协议的代理配置
+            if 'http' in self.proxy_config and self.proxy_config['http']:
+                proxies['http://'] = self.proxy_config['http']
+            if 'https' in self.proxy_config and self.proxy_config['https']:
+                proxies['https://'] = self.proxy_config['https']
+            if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
+                # SOCKS5代理可以同时处理HTTP和HTTPS请求
+                if 'http://' not in proxies:
+                    proxies['http://'] = self.proxy_config['socks5']
+                if 'https://' not in proxies:
+                    proxies['https://'] = self.proxy_config['socks5']
+
         async with httpx.AsyncClient(
             timeout=self.timeout,
             follow_redirects=True,
@@ -109,12 +139,20 @@ class Fetcher:
         try:
             # 配置代理（如果提供）
             proxies = None
-            if self.proxy_url:
-                proxies = {
-                    'http://': self.proxy_url,
-                    'https://': self.proxy_url,
-                }
-            
+            if self.proxy_config:
+                proxies = {}
+                # 添加各个协议的代理配置
+                if 'http' in self.proxy_config and self.proxy_config['http']:
+                    proxies['http://'] = self.proxy_config['http']
+                if 'https' in self.proxy_config and self.proxy_config['https']:
+                    proxies['https://'] = self.proxy_config['https']
+                if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
+                    # SOCKS5代理可以同时处理HTTP和HTTPS请求
+                    if 'http://' not in proxies:
+                        proxies['http://'] = self.proxy_config['socks5']
+                    if 'https://' not in proxies:
+                        proxies['https://'] = self.proxy_config['socks5']
+
             async with httpx.AsyncClient(
                 timeout=10,
                 verify=self.verify_ssl,

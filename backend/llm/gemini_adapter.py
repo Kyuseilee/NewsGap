@@ -25,14 +25,15 @@ class GeminiAdapter(BaseLLMAdapter):
         self,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        proxy_url: Optional[str] = None
+        proxy_url: Optional[str] = None,
+        proxy_config: Optional[dict] = None
     ):
         # 使用最新稳定的 Gemini 2.5 Flash 模型
-        super().__init__(api_key=api_key, model=model or "gemini-2.5-flash", proxy_url=proxy_url)
-        
+        super().__init__(api_key=api_key, model=model or "gemini-2.5-flash", proxy_url=proxy_url, proxy_config=proxy_config)
+
         if not self.api_key:
             raise ValueError("Gemini API Key is required. Please configure it in Settings.")
-        
+
         # 如果提供了代理，设置环境变量（google.generativeai通过httpx使用代理）
         if self.proxy_url:
             os.environ['HTTP_PROXY'] = self.proxy_url

@@ -62,14 +62,14 @@ async def analyze_articles(
         )
     
     # 获取代理配置
-    proxy_url = await config_mgr.get_proxy_url()
-    
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+
     # 创建分析器
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
         api_key=api_key,
         model=request.llm_model,  # 传递用户选择的模型
-        proxy_url=proxy_url
+        proxy_config=proxy_config
     )
     
     # 执行分析
@@ -122,12 +122,16 @@ async def estimate_analysis_cost(
     
     # 获取 API Key
     api_key = await config_mgr.get_api_key(request.llm_backend)
-    
+
+    # 获取代理配置
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+
     # 创建分析器并估算
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
         api_key=api_key,
-        model=request.llm_model
+        model=request.llm_model,
+        proxy_config=proxy_config
     )
     
     cost_estimate = analyzer.estimate_cost(articles)

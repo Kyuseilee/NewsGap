@@ -17,13 +17,28 @@ class Analyzer:
         llm_backend: str = "deepseek",
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        proxy_url: Optional[str] = None
+        proxy_url: Optional[str] = None,
+        proxy_config: Optional[dict] = None
     ):
+        # For backward compatibility, use proxy_url if proxy_config is not provided
+        if proxy_config and proxy_config.get('enabled'):
+            # Convert detailed proxy config to simple proxy URL (using first available)
+            if proxy_config.get('http'):
+                effective_proxy = proxy_config.get('http')
+            elif proxy_config.get('https'):
+                effective_proxy = proxy_config.get('https')
+            elif proxy_config.get('socks5'):
+                effective_proxy = proxy_config.get('socks5')
+            else:
+                effective_proxy = proxy_url
+        else:
+            effective_proxy = proxy_url
+
         self.adapter: BaseLLMAdapter = create_llm_adapter(
             backend=llm_backend,
             api_key=api_key,
             model=model,
-            proxy_url=proxy_url
+            proxy_url=effective_proxy
         )
     
     async def analyze(

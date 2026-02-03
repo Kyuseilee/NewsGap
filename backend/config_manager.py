@@ -70,13 +70,13 @@ class ConfigManager:
     
     async def set_proxy_config(self, proxy_config: Dict):
         """设置代理配置
-        
+
         Args:
             proxy_config: {
                 'enabled': bool,
-                'host': str,
-                'port': int,
-                'protocol': str  # 'http' or 'socks5'
+                'http_proxy': str,  # 'http://host:port'
+                'https_proxy': str, # 'https://host:port'
+                'socks5_proxy': str # 'socks5://host:port'
             }
         """
         async with self.db._get_connection() as conn:
@@ -87,16 +87,60 @@ class ConfigManager:
             await conn.commit()
     
     async def get_proxy_url(self) -> Optional[str]:
-        """获取代理URL（如果启用）
-        
+        """获取代理URL（如果启用）- 为了向后兼容，返回第一个可用的代理
+
         Returns:
-            格式: 'http://host:port' 或 'socks5://host:port' 或 None
+            格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port' 或 None
         """
         config = await self.get_proxy_config()
         if config and config.get('enabled'):
-            protocol = config.get('protocol', 'http')
-            host = config.get('host')
-            port = config.get('port')
-            if host and port:
-                return f"{protocol}://{host}:{port}"
+            # 按优先级返回第一个可用的代理
+            if config.get('http_proxy'):
+                return config.get('http_proxy')
+            elif config.get('https_proxy'):
+                return config.get('https_proxy')
+            elif config.get('socks5_proxy'):
+                return config.get('socks5_proxy')
         return None
+
+    async def get_proxy_config(self) -> Optional[Dict]:
+        """获取完整的代理配置
+
+        Returns:
+            代理配置字典，包含各个协议的代理设置
+        """
+        async with self.db._get_connection() as conn:
+            cursor = await conn.execute(
+                "SELECT value FROM config WHERE key = ?",
+                ("proxy_config",)
+            )
+            row = await cursor.fetchone()
+            if row:
+                return json.loads(row[0])
+        return None
+
+    async def get_detailed_proxy_config(self) -> Optional[Dict]:
+        """获取详细代理配置，返回各协议的独立配置
+
+        Returns:
+            格式: {
+                'enabled': bool,
+                'http': 'http://host:port' or None,
+                'https': 'https://host:port' or None,
+                'socks5': 'socks5://host:port' or None
+            }
+        """
+        config = await self.get_proxy_config()
+        if config and config.get('enabled'):
+            return {
+                'enabled': True,
+                'http': config.get('http_proxy'),
+                'https': config.get('https_proxy'),
+                'socks5': config.get('socks5_proxy')
+            }
+        return {
+            'enabled': False,
+            'http': None,
+            'https': None,
+            'socks5': None
+        }

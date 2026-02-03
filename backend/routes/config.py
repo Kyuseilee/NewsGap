@@ -277,9 +277,9 @@ async def set_rsshub_instance(
 # 代理配置管理
 class ProxyConfigRequest(BaseModel):
     enabled: bool
-    host: str = ""
-    port: int = 0
-    protocol: str = "http"  # 'http' or 'socks5'
+    http_proxy: str = ""  # 'http://host:port'
+    https_proxy: str = ""  # 'https://host:port'
+    socks5_proxy: str = ""  # 'socks5://host:port'
 
 
 @router.get("/proxy")
@@ -287,14 +287,7 @@ async def get_proxy_config(
     config_mgr: ConfigManager = Depends(get_config_manager)
 ):
     """获取代理配置"""
-    config = await config_mgr.get_proxy_config()
-    if not config:
-        config = {
-            'enabled': False,
-            'host': '',
-            'port': 0,
-            'protocol': 'http'
-        }
+    config = await config_mgr.get_detailed_proxy_config()
     return config
 
 
@@ -304,21 +297,23 @@ async def set_proxy_config(
     config_mgr: ConfigManager = Depends(get_config_manager)
 ):
     """设置代理配置"""
-    if request.enabled and (not request.host or request.port <= 0):
+    # 检查是否有任何代理配置
+    if request.enabled and not (request.http_proxy or request.https_proxy or request.socks5_proxy):
+        # 如果启用了代理但没有任何代理配置，则要求至少一个有效配置
         raise HTTPException(
             status_code=400,
-            detail="启用代理时必须提供有效的主机地址和端口"
+            detail="启用代理时必须至少配置一个代理地址 (HTTP, HTTPS, 或 SOCKS5)"
         )
-    
+
     proxy_config = {
         'enabled': request.enabled,
-        'host': request.host,
-        'port': request.port,
-        'protocol': request.protocol
+        'http_proxy': request.http_proxy,
+        'https_proxy': request.https_proxy,
+        'socks5_proxy': request.socks5_proxy
     }
-    
+
     await config_mgr.set_proxy_config(proxy_config)
-    
+
     return {
         'success': True,
         'message': '代理配置已保存',
@@ -333,12 +328,12 @@ async def delete_proxy_config(
     """删除/禁用代理配置"""
     proxy_config = {
         'enabled': False,
-        'host': '',
-        'port': 0,
-        'protocol': 'http'
+        'http_proxy': '',
+        'https_proxy': '',
+        'socks5_proxy': ''
     }
     await config_mgr.set_proxy_config(proxy_config)
-    
+
     return {
         'success': True,
         'message': '代理配置已禁用'

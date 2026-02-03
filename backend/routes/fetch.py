@@ -28,8 +28,17 @@ async def get_crawler(db: Database = Depends(get_db)):
     """依赖注入：爬虫（带代理配置）"""
     from config_manager import ConfigManager
     config_mgr = ConfigManager(db)
-    proxy_url = await config_mgr.get_proxy_url()
-    return CrawlerService(proxy_url=proxy_url)
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+    if proxy_config and proxy_config.get('enabled'):
+        # Convert to the format expected by CrawlerService
+        formatted_config = {
+            'http': proxy_config.get('http'),
+            'https': proxy_config.get('https'),
+            'socks5': proxy_config.get('socks5')
+        }
+        return CrawlerService(proxy_config=formatted_config)
+    else:
+        return CrawlerService()
 
 
 @router.post("", response_model=FetchResponse)

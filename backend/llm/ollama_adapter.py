@@ -18,9 +18,10 @@ class OllamaAdapter(BaseLLMAdapter):
         self,
         model: Optional[str] = None,
         base_url: str = "http://localhost:11434",
-        proxy_url: Optional[str] = None
+        proxy_url: Optional[str] = None,
+        proxy_config: Optional[dict] = None
     ):
-        super().__init__(api_key=None, model=model or "llama3.1", proxy_url=proxy_url)
+        super().__init__(api_key=None, model=model or "llama3.1", proxy_url=proxy_url, proxy_config=proxy_config)
         self.base_url = base_url
     
     async def analyze(

@@ -19,10 +19,11 @@ class OpenAIAdapter(BaseLLMAdapter):
         self,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        proxy_url: Optional[str] = None
+        proxy_url: Optional[str] = None,
+        proxy_config: Optional[dict] = None
     ):
-        super().__init__(api_key=api_key, model=model or "gpt-4o-mini", proxy_url=proxy_url)
-        
+        super().__init__(api_key=api_key, model=model or "gpt-4o-mini", proxy_url=proxy_url, proxy_config=proxy_config)
+
         # 配置HTTP客户端以支持代理
         http_client = None
         if self.proxy_url:
@@ -32,7 +33,7 @@ class OpenAIAdapter(BaseLLMAdapter):
                     'https://': self.proxy_url,
                 }
             )
-        
+
         self.client = AsyncOpenAI(api_key=self.api_key, http_client=http_client)
     
     async def analyze(

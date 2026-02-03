@@ -69,9 +69,9 @@ function ProxyConfigManager() {
   const [isEditing, setIsEditing] = useState(false)
   const [config, setConfig] = useState({
     enabled: false,
-    host: '',
-    port: 0,
-    protocol: 'http',
+    http_proxy: '',
+    https_proxy: '',
+    socks5_proxy: '',
   })
   const queryClient = useQueryClient()
 
@@ -103,16 +103,16 @@ function ProxyConfigManager() {
   const handleEdit = () => {
     setConfig({
       enabled: proxyConfig?.enabled || false,
-      host: proxyConfig?.host || '',
-      port: proxyConfig?.port || 0,
-      protocol: proxyConfig?.protocol || 'http',
+      http_proxy: proxyConfig?.http || '',
+      https_proxy: proxyConfig?.https || '',
+      socks5_proxy: proxyConfig?.socks5 || '',
     })
     setIsEditing(true)
   }
 
   const handleSave = () => {
-    if (config.enabled && (!config.host || config.port <= 0)) {
-      alert('请输入有效的代理地址和端口')
+    if (config.enabled && !config.http_proxy && !config.https_proxy && !config.socks5_proxy) {
+      alert('请至少配置一个代理地址 (HTTP, HTTPS, 或 SOCKS5)')
       return
     }
     setProxyMutation.mutate(config)
@@ -122,9 +122,9 @@ function ProxyConfigManager() {
     setIsEditing(false)
     setConfig({
       enabled: false,
-      host: '',
-      port: 0,
-      protocol: 'http',
+      http_proxy: '',
+      https_proxy: '',
+      socks5_proxy: '',
     })
   }
 
@@ -142,7 +142,7 @@ function ProxyConfigManager() {
         <div className="flex items-center gap-3">
           <Globe size={24} className="text-gray-400" />
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">HTTP/SOCKS5 代理</h3>
+            <h3 className="text-lg font-semibold text-gray-900">独立代理配置</h3>
             <p className="text-sm text-gray-600 mt-1">
               配置网络代理以访问RSS源和AI API（适用于受限网络环境）
             </p>
@@ -172,44 +172,40 @@ function ProxyConfigManager() {
 
           {config.enabled && (
             <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  代理协议
-                </label>
-                <select
-                  value={config.protocol}
-                  onChange={(e) => setConfig({ ...config, protocol: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="http">HTTP</option>
-                  <option value="socks5">SOCKS5</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    代理地址
+                    HTTP 代理
                   </label>
                   <input
                     type="text"
-                    value={config.host}
-                    onChange={(e) => setConfig({ ...config, host: e.target.value })}
-                    placeholder="例如: 127.0.0.1 或 proxy.example.com"
+                    value={config.http_proxy}
+                    onChange={(e) => setConfig({ ...config, http_proxy: e.target.value })}
+                    placeholder="例如: http://127.0.0.1:8080"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    端口
+                    HTTPS 代理
                   </label>
                   <input
-                    type="number"
-                    value={config.port || ''}
-                    onChange={(e) => setConfig({ ...config, port: parseInt(e.target.value) || 0 })}
-                    placeholder="例如: 7890"
-                    min="1"
-                    max="65535"
+                    type="text"
+                    value={config.https_proxy}
+                    onChange={(e) => setConfig({ ...config, https_proxy: e.target.value })}
+                    placeholder="例如: https://127.0.0.1:8080"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SOCKS5 代理
+                  </label>
+                  <input
+                    type="text"
+                    value={config.socks5_proxy}
+                    onChange={(e) => setConfig({ ...config, socks5_proxy: e.target.value })}
+                    placeholder="例如: socks5://127.0.0.1:1080"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -240,20 +236,24 @@ function ProxyConfigManager() {
           {isConfigured ? (
             <div className="space-y-3">
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500">协议:</span>
-                    <span className="ml-2 font-medium text-gray-900 uppercase">
-                      {proxyConfig.protocol}
+                    <span className="text-gray-500">HTTP 代理:</span>
+                    <span className="ml-2 font-medium text-gray-900">
+                      {proxyConfig.http ? proxyConfig.http : '未配置'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">地址:</span>
-                    <span className="ml-2 font-medium text-gray-900">{proxyConfig.host}</span>
+                    <span className="text-gray-500">HTTPS 代理:</span>
+                    <span className="ml-2 font-medium text-gray-900">
+                      {proxyConfig.https ? proxyConfig.https : '未配置'}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">端口:</span>
-                    <span className="ml-2 font-medium text-gray-900">{proxyConfig.port}</span>
+                    <span className="text-gray-500">SOCKS5 代理:</span>
+                    <span className="ml-2 font-medium text-gray-900">
+                      {proxyConfig.socks5 ? proxyConfig.socks5 : '未配置'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -291,7 +291,7 @@ function ProxyConfigManager() {
       <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
           <strong>提示</strong>：配置代理后，所有RSS拉取和AI API调用都将通过代理服务器。
-          支持HTTP和SOCKS5协议。常见代理工具：Clash (7890端口)、V2Ray等。
+          支持独立配置HTTP、HTTPS和SOCKS5代理。常见代理工具：Clash (7890端口)、V2Ray等。
         </p>
       </div>
     </div>

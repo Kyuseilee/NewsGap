@@ -18,16 +18,29 @@ from prompts import get_prompt_manager
 class BaseLLMAdapter(LLMAdapterInterface, ABC):
     """LLM 适配器基类"""
     
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, proxy_url: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, proxy_url: Optional[str] = None, proxy_config: Optional[dict] = None):
         """
         Args:
             api_key: API密钥
             model: 模型名称
-            proxy_url: 代理URL，格式: 'http://host:port'
+            proxy_url: 代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'
+            proxy_config: 代理配置，格式: {'enabled': bool, 'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
         """
         self.api_key = api_key
         self.model = model
-        self.proxy_url = proxy_url
+        # For backward compatibility, use proxy_url if proxy_config is not provided
+        if proxy_config and proxy_config.get('enabled'):
+            # Use first available proxy from config
+            if proxy_config.get('http'):
+                self.proxy_url = proxy_config.get('http')
+            elif proxy_config.get('https'):
+                self.proxy_url = proxy_config.get('https')
+            elif proxy_config.get('socks5'):
+                self.proxy_url = proxy_config.get('socks5')
+            else:
+                self.proxy_url = proxy_url
+        else:
+            self.proxy_url = proxy_url
     
     def estimate_cost(self, articles: List[Article]) -> dict:
         """估算分析成本"""
@@ -205,34 +218,36 @@ def create_llm_adapter(
     backend: str,
     api_key: Optional[str] = None,
     model: Optional[str] = None,
-    proxy_url: Optional[str] = None
+    proxy_url: Optional[str] = None,
+    proxy_config: Optional[dict] = None
 ) -> BaseLLMAdapter:
     """
     创建 LLM 适配器
-    
+
     Args:
         backend: "ollama", "openai", "deepseek", "gemini"
         api_key: API 密钥（本地模型不需要）
         model: 模型名称
-        proxy_url: 代理URL，格式: 'http://host:port'
+        proxy_url: 代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'
+        proxy_config: 代理配置，格式: {'enabled': bool, 'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
     """
     backend = backend.lower()
-    
+
     if backend == "ollama":
         from llm.ollama_adapter import OllamaAdapter
-        return OllamaAdapter(model=model, proxy_url=proxy_url)
-    
+        return OllamaAdapter(model=model, proxy_url=proxy_url, proxy_config=proxy_config)
+
     elif backend == "openai":
         from llm.openai_adapter import OpenAIAdapter
-        return OpenAIAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
-    
+        return OpenAIAdapter(api_key=api_key, model=model, proxy_url=proxy_url, proxy_config=proxy_config)
+
     elif backend == "deepseek":
         from llm.deepseek_adapter import DeepSeekAdapter
-        return DeepSeekAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
-    
+        return DeepSeekAdapter(api_key=api_key, model=model, proxy_url=proxy_url, proxy_config=proxy_config)
+
     elif backend == "gemini":
         from llm.gemini_adapter import GeminiAdapter
-        return GeminiAdapter(api_key=api_key, model=model, proxy_url=proxy_url)
-    
+        return GeminiAdapter(api_key=api_key, model=model, proxy_url=proxy_url, proxy_config=proxy_config)
+
     else:
         raise ValueError(f"Unknown LLM backend: {backend}")
