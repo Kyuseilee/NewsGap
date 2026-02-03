@@ -38,13 +38,6 @@ crawler:
 
 # RSSHub 配置
 rsshub:
-  # 本地 RSSHub 实例
-  custom_instance: "http://localhost:1200"
-  
-  # 备用公共实例（选择稳定性较好的，按优先级排序）
-  public_instances:
-    - https://rss.shab.fun  # 国内实例，较稳定
-    - https://rsshub.rssforever.com  # 国内实例
-    - https://rsshub.app  # 官方实例（可能有SSL问题）
-    - https://rsshub.pseudoyu.com  # 备用
+  # 本地 RSSHub 实例（Docker部署）
+  instance: "http://localhost:1200"
 

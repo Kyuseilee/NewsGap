@@ -49,7 +49,8 @@ class OpenAIAdapter(BaseLLMAdapter):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.3
+            temperature=0.3,
+            max_tokens=8000  # 设置足够大的输出长度，避免截断
         )
         
         processing_time = (datetime.now() - start_time).total_seconds()
@@ -144,7 +145,11 @@ class OpenAIAdapter(BaseLLMAdapter):
 
 {report_format}
 
-⚠️ **提醒**：直接输出 Markdown，不要用代码块包裹。确保报告完整，不中途截断。
+⚠️ **重要提醒**：
+1. 直接输出 Markdown 格式，不要用代码块包裹
+2. **必须完整输出所有章节**，不要中途截断
+3. 确保每个章节都有完整内容，包括结尾的总结
+4. 如果内容较长，请务必输出完整，不要省略
 """
     
     def get_model_info(self) -> dict:
