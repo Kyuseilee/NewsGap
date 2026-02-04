@@ -7,6 +7,7 @@ HTTP 请求封装
 import httpx
 from typing import Optional, Dict
 import logging
+from utils.proxy_helper import ProxyHelper
 
 logger = logging.getLogger(__name__)
 
@@ -20,25 +21,31 @@ class Fetcher:
         user_agent: str = "NewsGap/0.1.0 (Information Intelligence Tool)",
         verify_ssl: bool = False,  # 默认不验证 SSL，避免证书问题
         proxy_url: Optional[str] = None,  # 旧版代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'
-        proxy_config: Optional[dict] = None  # 新版代理配置，格式: {'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
+        proxy_config: Optional[dict] = None  # 新版代理配置，格式: {'enabled': bool, 'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
     ):
         self.timeout = timeout
         self.user_agent = user_agent
         self.verify_ssl = verify_ssl
-        # For backward compatibility, if proxy_config is not provided but proxy_url is, convert it
+        
+        # 统一处理代理配置（向后兼容）
         if proxy_config is None and proxy_url is not None:
-            # Convert single proxy URL to config format (put it in the appropriate slot based on URL scheme)
-            if proxy_url.startswith('http://'):
-                self.proxy_config = {'http': proxy_url, 'https': None, 'socks5': None}
-            elif proxy_url.startswith('https://'):
-                self.proxy_config = {'http': None, 'https': proxy_url, 'socks5': None}
-            elif proxy_url.startswith('socks5://'):
-                self.proxy_config = {'http': None, 'https': None, 'socks5': proxy_url}
-            else:
-                # Default to http if no scheme specified
-                self.proxy_config = {'http': proxy_url, 'https': None, 'socks5': None}
-        else:
-            self.proxy_config = proxy_config or {}
+            # 将单个代理 URL 转换为配置格式
+            proxy_config = ProxyHelper.convert_single_url_to_config(proxy_url)
+        
+        # 预先转换为 httpx 格式，避免每次请求都转换
+        self._httpx_proxies = ProxyHelper.convert_to_httpx_proxies(proxy_config)
+        
+        if self._httpx_proxies:
+            logger.info(f"Fetcher 使用代理: {self._httpx_proxies}")
+    
+    def _get_client_kwargs(self) -> dict:
+        """获取 httpx.AsyncClient 的统一配置参数"""
+        return {
+            'timeout': self.timeout,
+            'follow_redirects': True,
+            'verify': self.verify_ssl,
+            'proxies': self._httpx_proxies
+        }
     
     async def fetch(
         self,
@@ -61,28 +68,7 @@ class Fetcher:
             default_headers.update(headers)
         
         try:
-            # 配置代理（如果提供）
-            proxies = None
-            if self.proxy_config:
-                proxies = {}
-                # 添加各个协议的代理配置
-                if 'http' in self.proxy_config and self.proxy_config['http']:
-                    proxies['http://'] = self.proxy_config['http']
-                if 'https' in self.proxy_config and self.proxy_config['https']:
-                    proxies['https://'] = self.proxy_config['https']
-                if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
-                    # SOCKS5代理可以同时处理HTTP和HTTPS请求
-                    if 'http://' not in proxies:
-                        proxies['http://'] = self.proxy_config['socks5']
-                    if 'https://' not in proxies:
-                        proxies['https://'] = self.proxy_config['socks5']
-
-            async with httpx.AsyncClient(
-                timeout=self.timeout,
-                follow_redirects=True,
-                verify=self.verify_ssl,
-                proxies=proxies
-            ) as client:
+            async with httpx.AsyncClient(**self._get_client_kwargs()) as client:
                 response = await client.get(url, headers=default_headers)
                 response.raise_for_status()
                 return response.text, response.status_code
@@ -108,28 +94,7 @@ class Fetcher:
         if headers:
             default_headers.update(headers)
         
-        # 配置代理（如果提供）
-        proxies = None
-        if self.proxy_config:
-            proxies = {}
-            # 添加各个协议的代理配置
-            if 'http' in self.proxy_config and self.proxy_config['http']:
-                proxies['http://'] = self.proxy_config['http']
-            if 'https' in self.proxy_config and self.proxy_config['https']:
-                proxies['https://'] = self.proxy_config['https']
-            if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
-                # SOCKS5代理可以同时处理HTTP和HTTPS请求
-                if 'http://' not in proxies:
-                    proxies['http://'] = self.proxy_config['socks5']
-                if 'https://' not in proxies:
-                    proxies['https://'] = self.proxy_config['socks5']
-
-        async with httpx.AsyncClient(
-            timeout=self.timeout,
-            follow_redirects=True,
-            verify=self.verify_ssl,
-            proxies=proxies
-        ) as client:
+        async with httpx.AsyncClient(**self._get_client_kwargs()) as client:
             response = await client.get(url, headers=default_headers)
             response.raise_for_status()
             return response.content, response.status_code
@@ -137,27 +102,11 @@ class Fetcher:
     async def check_url(self, url: str) -> bool:
         """检查 URL 是否可访问"""
         try:
-            # 配置代理（如果提供）
-            proxies = None
-            if self.proxy_config:
-                proxies = {}
-                # 添加各个协议的代理配置
-                if 'http' in self.proxy_config and self.proxy_config['http']:
-                    proxies['http://'] = self.proxy_config['http']
-                if 'https' in self.proxy_config and self.proxy_config['https']:
-                    proxies['https://'] = self.proxy_config['https']
-                if 'socks5' in self.proxy_config and self.proxy_config['socks5']:
-                    # SOCKS5代理可以同时处理HTTP和HTTPS请求
-                    if 'http://' not in proxies:
-                        proxies['http://'] = self.proxy_config['socks5']
-                    if 'https://' not in proxies:
-                        proxies['https://'] = self.proxy_config['socks5']
-
-            async with httpx.AsyncClient(
-                timeout=10,
-                verify=self.verify_ssl,
-                proxies=proxies
-            ) as client:
+            # 使用较短的超时时间进行检查
+            client_kwargs = self._get_client_kwargs()
+            client_kwargs['timeout'] = 10  # 固定 10 秒超时
+            
+            async with httpx.AsyncClient(**client_kwargs) as client:
                 response = await client.head(url, follow_redirects=True)
                 return response.status_code < 400
         except Exception:

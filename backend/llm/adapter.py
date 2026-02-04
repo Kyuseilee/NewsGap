@@ -13,6 +13,7 @@ from models import (
     LLMAdapterInterface, Trend, Signal, InformationGap
 )
 from prompts import get_prompt_manager
+from utils.proxy_helper import ProxyHelper
 
 
 class BaseLLMAdapter(LLMAdapterInterface, ABC):
@@ -23,23 +24,18 @@ class BaseLLMAdapter(LLMAdapterInterface, ABC):
         Args:
             api_key: API密钥
             model: 模型名称
-            proxy_url: 代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'
+            proxy_url: 代理URL，格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port'（向后兼容）
             proxy_config: 代理配置，格式: {'enabled': bool, 'http': 'http://host:port', 'https': 'https://host:port', 'socks5': 'socks5://host:port'}
         """
         self.api_key = api_key
         self.model = model
-        # For backward compatibility, use proxy_url if proxy_config is not provided
-        if proxy_config and proxy_config.get('enabled'):
-            # Use first available proxy from config
-            if proxy_config.get('http'):
-                self.proxy_url = proxy_config.get('http')
-            elif proxy_config.get('https'):
-                self.proxy_url = proxy_config.get('https')
-            elif proxy_config.get('socks5'):
-                self.proxy_url = proxy_config.get('socks5')
-            else:
-                self.proxy_url = proxy_url
-        else:
+        self.proxy_config = proxy_config
+        
+        # 使用工具类统一处理代理配置
+        self.proxy_url = ProxyHelper.get_first_available_proxy(proxy_config)
+        
+        # 向后兼容：如果没有 proxy_config 但有 proxy_url
+        if self.proxy_url is None and proxy_url:
             self.proxy_url = proxy_url
     
     def estimate_cost(self, articles: List[Article]) -> dict:

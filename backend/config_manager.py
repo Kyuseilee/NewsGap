@@ -7,6 +7,7 @@
 import json
 from typing import Optional, Dict
 from storage.database import Database
+from utils.proxy_helper import ProxyHelper
 
 
 class ConfigManager:
@@ -56,18 +57,6 @@ class ConfigManager:
             del config['api_key']
             await self.set_llm_config(backend, config)
     
-    async def get_proxy_config(self) -> Optional[Dict]:
-        """获取代理配置"""
-        async with self.db._get_connection() as conn:
-            cursor = await conn.execute(
-                "SELECT value FROM config WHERE key = ?",
-                ("proxy_config",)
-            )
-            row = await cursor.fetchone()
-            if row:
-                return json.loads(row[0])
-        return None
-    
     async def set_proxy_config(self, proxy_config: Dict):
         """设置代理配置
 
@@ -93,15 +82,7 @@ class ConfigManager:
             格式: 'http://host:port' 或 'https://host:port' 或 'socks5://host:port' 或 None
         """
         config = await self.get_proxy_config()
-        if config and config.get('enabled'):
-            # 按优先级返回第一个可用的代理
-            if config.get('http_proxy'):
-                return config.get('http_proxy')
-            elif config.get('https_proxy'):
-                return config.get('https_proxy')
-            elif config.get('socks5_proxy'):
-                return config.get('socks5_proxy')
-        return None
+        return ProxyHelper.get_first_available_proxy(config)
 
     async def get_proxy_config(self) -> Optional[Dict]:
         """获取完整的代理配置

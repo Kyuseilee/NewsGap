@@ -7,6 +7,7 @@
 from typing import List, Optional
 from models import Article, Analysis, AnalysisType, IndustryCategory
 from llm.adapter import create_llm_adapter, BaseLLMAdapter
+from utils.proxy_helper import ProxyHelper
 
 
 class Analyzer:
@@ -20,25 +21,19 @@ class Analyzer:
         proxy_url: Optional[str] = None,
         proxy_config: Optional[dict] = None
     ):
-        # For backward compatibility, use proxy_url if proxy_config is not provided
-        if proxy_config and proxy_config.get('enabled'):
-            # Convert detailed proxy config to simple proxy URL (using first available)
-            if proxy_config.get('http'):
-                effective_proxy = proxy_config.get('http')
-            elif proxy_config.get('https'):
-                effective_proxy = proxy_config.get('https')
-            elif proxy_config.get('socks5'):
-                effective_proxy = proxy_config.get('socks5')
-            else:
-                effective_proxy = proxy_url
-        else:
+        # 使用工具类统一处理代理配置
+        effective_proxy = ProxyHelper.get_first_available_proxy(proxy_config)
+        
+        # 如果没有 proxy_config 但有 proxy_url，使用 proxy_url（向后兼容）
+        if effective_proxy is None and proxy_url:
             effective_proxy = proxy_url
 
         self.adapter: BaseLLMAdapter = create_llm_adapter(
             backend=llm_backend,
             api_key=api_key,
             model=model,
-            proxy_url=effective_proxy
+            proxy_url=effective_proxy,
+            proxy_config=proxy_config
         )
     
     async def analyze(
