@@ -137,3 +137,17 @@ Desktop.ini
 !backend/archives/.gitkeep
 !logs/.gitkeep
 !data/.gitkeep
+
+# Tauri build outputs
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# Backend build outputs
+backend/build/
+backend/dist/
+
+# RSSHub source (clone separately)
+rsshub-source/
+
+# Rust backup config
+*.bak
