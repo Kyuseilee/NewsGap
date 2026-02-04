@@ -73,6 +73,15 @@ frontend/.env
 frontend/.env.local
 frontend/.env.production
 
+# TypeScript 编译产物（.js 文件）
+frontend/src/**/*.js
+frontend/src/**/*.jsx
+
+# Capacitor 原生项目（仅在 mobile-app 分支跟踪）
+frontend/android/
+frontend/ios/
+frontend/capacitor.config.ts
+
 # ============================================================================
 # 编辑器 / IDE
 # ============================================================================
