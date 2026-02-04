@@ -1,9 +1,22 @@
 import { useState, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Play, Zap, Loader2 } from 'lucide-react'
+import { Play, Zap, Loader2, AlertTriangle } from 'lucide-react'
 import { api } from '@/services/api'
 import type { IntelligenceRequest, CustomCategory } from '@/types/api'
+
+// 文章数量阈值配置
+const ARTICLE_COUNT_THRESHOLD = {
+  MIN: 5,        // 最小文章数量
+  WARNING: 10,   // 警告阈值
+  GOOD: 20,      // 良好阈值
+}
+
+// 重试配置
+const RETRY_CONFIG = {
+  MAX_ATTEMPTS: 2,   // 最大重试次数
+  DELAY_MS: 3000,    // 重试延迟（毫秒）
+}
 
 export default function HomePage() {
   // 路由导航和query管理
@@ -19,6 +32,13 @@ export default function HomePage() {
   const [hours, setHours] = useState(24)
   const [llmBackend, setLlmBackend] = useState('gemini')
   const [llmModel, setLlmModel] = useState<string>('')
+  
+  // 文章获取状态
+  const [fetchingStatus, setFetchingStatus] = useState<{
+    attempt: number
+    articleCount: number
+    isRetrying: boolean
+  } | null>(null)
 
   // 获取LLM后端列表
   const { data: backends } = useQuery({
@@ -76,7 +96,7 @@ export default function HomePage() {
   const intelligenceMutation = useMutation({
     mutationFn: (data: IntelligenceRequest) => api.intelligence(data),
     onSuccess: (data) => {
-      alert(`一键情报完成！爬取 ${data.article_count} 篇文章，已生成分析报告。`)
+      alert(`✅ 一键情报完成！\n\n爬取 ${data.article_count} 篇文章，已生成分析报告。`)
       // 刷新文章列表缓存
       queryClient.invalidateQueries({ queryKey: ['articles'], refetchType: 'all' })
       // 自动跳转到分析报告详情页面
@@ -85,14 +105,9 @@ export default function HomePage() {
       }
     },
     onError: (error: any) => {
-      // 处理404错误
-      if (error.response?.status === 404) {
-        alert('❌ 未能获取到文章\n\n可能原因：\n• 本地 RSSHub 服务未启动\n• 信息源暂时不可用\n• 该分类下没有可用的信息源\n\n请检查 RSSHub 服务状态或稍后重试')
-      } else {
-        // 其他错误
-        const errorMsg = error.response?.data?.detail || error.message || '未知错误'
-        alert(`❌ 操作失败：${errorMsg}`)
-      }
+      // 只处理分析阶段的错误（文章获取错误已在 handleIntelligence 中处理）
+      const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+      alert(`❌ 分析失败：${errorMsg}\n\n可能原因：\n• LLM API 调用失败\n• API Key 未配置或无效\n• 网络连接问题`)
     },
   })
 
@@ -103,7 +118,70 @@ export default function HomePage() {
     })
   }
 
-  const handleIntelligence = () => {
+  // 检查文章数量（带重试）
+  const checkAndFetchArticles = async (
+    request: { industry?: string; custom_category_id?: string; hours: number },
+    attempt: number = 1
+  ): Promise<{ count: number; shouldProceed: boolean }> => {
+    try {
+      // 显示获取状态
+      setFetchingStatus({
+        attempt,
+        articleCount: 0,
+        isRetrying: attempt > 1
+      })
+
+      // 调用爬取 API
+      const fetchRequest: any = { hours: request.hours }
+      if (request.industry) {
+        fetchRequest.industry = request.industry
+      }
+      if (request.custom_category_id) {
+        fetchRequest.custom_category_id = request.custom_category_id
+      }
+      
+      const result = await api.fetch(fetchRequest)
+      const count = result.count
+
+      // 更新文章数量
+      setFetchingStatus(prev => prev ? { ...prev, articleCount: count } : null)
+
+      // 如果文章数量足够，直接返回
+      if (count >= ARTICLE_COUNT_THRESHOLD.MIN) {
+        setFetchingStatus(null)
+        return { count, shouldProceed: true }
+      }
+
+      // 如果还有重试机会且文章太少
+      if (attempt < RETRY_CONFIG.MAX_ATTEMPTS) {
+        // 等待一段时间后重试
+        await new Promise(resolve => setTimeout(resolve, RETRY_CONFIG.DELAY_MS))
+        return checkAndFetchArticles(request, attempt + 1)
+      }
+
+      // 重试次数用尽，文章仍然太少
+      setFetchingStatus(null)
+      return { count, shouldProceed: false }
+    } catch (error) {
+      setFetchingStatus(null)
+      throw error
+    }
+  }
+
+  // 显示文章数量警告弹窗
+  const showArticleCountWarning = (count: number) => {
+    const message = count === 0
+      ? '❌ 未能获取到任何文章\n\n可能原因：\n• 本地 RSSHub 服务未启动\n• 信息源暂时不可用\n• 该分类下没有可用的信息源\n\n请检查 RSSHub 服务状态或稍后重试'
+      : `⚠️ 获取的文章数量较少（${count} 篇）\n\n建议：\n• 扩大时间范围（当前：${hours}小时）\n• 检查信息源配置是否正常\n• 等待一段时间后重试\n\n至少需要 ${ARTICLE_COUNT_THRESHOLD.MIN} 篇文章才能进行有效分析。`
+    
+    if (window.confirm(message + '\n\n是否要继续？')) {
+      // 用户确认继续
+      return true
+    }
+    return false
+  }
+
+  const handleIntelligence = async () => {
     const request: IntelligenceRequest = {
       hours,
       llm_backend: llmBackend,
@@ -116,10 +194,32 @@ export default function HomePage() {
       request.industry = industry
     }
 
-    intelligenceMutation.mutate(request)
+    try {
+      // 先检查文章数量（带重试）
+      const { count, shouldProceed } = await checkAndFetchArticles(request)
+      
+      if (!shouldProceed) {
+        // 文章太少，显示警告
+        const userConfirmed = showArticleCountWarning(count)
+        if (!userConfirmed) {
+          return // 用户取消
+        }
+      }
+
+      // 文章数量足够（或用户确认继续），发起分析请求
+      intelligenceMutation.mutate(request)
+    } catch (error: any) {
+      // 处理获取文章时的错误
+      if (error.response?.status === 404) {
+        alert('❌ 未能获取到文章\n\n可能原因：\n• 本地 RSSHub 服务未启动\n• 信息源暂时不可用\n• 该分类下没有可用的信息源\n\n请检查 RSSHub 服务状态或稍后重试')
+      } else {
+        const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+        alert(`❌ 获取文章失败：${errorMsg}`)
+      }
+    }
   }
 
-  const isLoading = fetchMutation.isPending || intelligenceMutation.isPending
+  const isLoading = fetchMutation.isPending || intelligenceMutation.isPending || fetchingStatus !== null
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
@@ -328,7 +428,12 @@ export default function HomePage() {
               {intelligenceMutation.isPending ? (
                 <>
                   <Loader2 size={20} className="animate-spin" />
-                  处理中...
+                  分析中...
+                </>
+              ) : fetchingStatus ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  {fetchingStatus.isRetrying ? `重试中 (${fetchingStatus.attempt}/${RETRY_CONFIG.MAX_ATTEMPTS})` : '获取文章中...'}
                 </>
               ) : (
                 <>
@@ -338,6 +443,29 @@ export default function HomePage() {
               )}
             </button>
           </div>
+
+          {/* 文章获取状态提示 */}
+          {fetchingStatus && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="text-yellow-600 mt-0.5" size={20} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-yellow-900">
+                    {fetchingStatus.isRetrying ? '文章数量较少，正在重新获取...' : '正在获取文章...'}
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    尝试次数: {fetchingStatus.attempt}/{RETRY_CONFIG.MAX_ATTEMPTS}
+                    {fetchingStatus.articleCount > 0 && ` · 已获取: ${fetchingStatus.articleCount} 篇`}
+                  </p>
+                  {fetchingStatus.isRetrying && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      等待 {RETRY_CONFIG.DELAY_MS / 1000} 秒后重试...
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 结果显示 */}
