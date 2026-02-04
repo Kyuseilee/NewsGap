@@ -7,6 +7,7 @@ LLM 适配器基类与工厂
 import tiktoken
 from typing import List, Optional
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from models import (
     Article, Analysis, AnalysisType, IndustryCategory,
@@ -18,6 +19,23 @@ from utils.proxy_helper import ProxyHelper
 
 class BaseLLMAdapter(LLMAdapterInterface, ABC):
     """LLM 适配器基类"""
+    
+    # 行业中文名称映射
+    INDUSTRY_NAME_MAP = {
+        "socialmedia": "社交媒体",
+        "news": "新闻资讯",
+        "tech": "科技互联网",
+        "developer": "开发者",
+        "finance": "财经金融",
+        "entertainment": "娱乐影视",
+        "gaming": "游戏电竞",
+        "anime": "动漫二次元",
+        "shopping": "电商购物",
+        "education": "学习教育",
+        "lifestyle": "生活方式",
+        "other": "其他",
+        "custom": "自定义",
+    }
     
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, proxy_url: Optional[str] = None, proxy_config: Optional[dict] = None):
         """
@@ -74,6 +92,22 @@ class BaseLLMAdapter(LLMAdapterInterface, ABC):
             char_count = len(total_text)
             estimated_tokens = int(char_count / 1.5)
             return estimated_tokens + system_prompt_tokens
+    
+    def _get_report_title_format(self, industry: Optional[IndustryCategory] = None) -> str:
+        """生成报告标题格式提示
+        
+        Args:
+            industry: 行业分类
+            
+        Returns:
+            标题格式字符串，例如 "# 2026-02-04-财经金融-[报告主题]"
+        """
+        today = datetime.now().strftime("%Y-%m-%d")
+        industry_cn = self.INDUSTRY_NAME_MAP.get(
+            industry.value if industry else "other", 
+            "综合"
+        )
+        return f"# {today}-{industry_cn}-[报告主题]"
     
     def _build_system_prompt(
         self, 

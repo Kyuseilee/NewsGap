@@ -92,6 +92,9 @@ class GeminiAdapter(BaseLLMAdapter):
             
             response_text = response.text
             
+            # 清理表格中的过量空格（Gemini表格生成bug的workaround）
+            response_text = self._clean_table_spaces(response_text)
+            
             # 检查finish_reason，确保响应完整
             finish_reason = None
             if hasattr(response, 'candidates') and response.candidates:
@@ -239,6 +242,9 @@ class GeminiAdapter(BaseLLMAdapter):
         # 获取品类特定的报告格式（传入analysis_type）
         report_format = prompt_manager.get_report_format_prompt(industry, analysis_type)
         
+        # 使用基类方法生成标题格式
+        title_format = self._get_report_title_format(industry)
+        
         return f"""{task_desc}
 
 {articles_text}
@@ -247,12 +253,51 @@ class GeminiAdapter(BaseLLMAdapter):
 
 {report_format}
 
-⚠️ **重要提醒**：
-1. 直接输出 Markdown 格式，不要用代码块包裹
-2. **必须完整输出所有章节**，不要中途截断
-3. 确保每个章节都有完整内容，包括结尾的总结
-4. 如果内容较长，请务必输出完整，不要省略
+⚠️ **输出要求**：
+- 报告标题格式：{title_format}（例如：# 2026-02-04-财经金融-市场分析报告）
+- 直接输出 Markdown 格式，不要用代码块包裹
+- 必须完整输出所有章节，确保包含结尾总结
 """
+    
+    def _clean_table_spaces(self, text: str) -> str:
+        """清理Markdown表格中的过量空格
+        
+        Gemini有时会在表格单元格中填充大量空格,导致输出字符数暴涨
+        这个函数清理这些冗余空格
+        """
+        import re
+        
+        # 统计原始字符数
+        original_len = len(text)
+        
+        # 查找表格行（以|开头和结尾）
+        lines = text.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            # 如果是表格行
+            if line.strip().startswith('|') and line.strip().endswith('|'):
+                # 分割单元格
+                cells = line.split('|')
+                # 清理每个单元格（保留最多3个连续空格）
+                cleaned_cells = []
+                for cell in cells:
+                    # 压缩多余空格
+                    cleaned_cell = re.sub(r' {4,}', '   ', cell)
+                    cleaned_cells.append(cleaned_cell)
+                cleaned_line = '|'.join(cleaned_cells)
+                cleaned_lines.append(cleaned_line)
+            else:
+                cleaned_lines.append(line)
+        
+        result = '\n'.join(cleaned_lines)
+        
+        # 记录清理效果
+        if len(result) < original_len:
+            saved = original_len - len(result)
+            logger.info(f"表格空格清理: 节省 {saved:,} 字符 ({saved/original_len*100:.1f}%)")
+        
+        return result
     
     def _sync_generate(self, prompt: str):
         """同步调用 Gemini API（在线程池中运行）"""

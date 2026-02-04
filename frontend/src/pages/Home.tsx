@@ -282,12 +282,11 @@ export default function HomePage() {
                 onChange={(e) => setIndustry(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="social">社交媒体（微博、知乎、即刻等）</option>
+                <option value="socialmedia">社交媒体（微博、知乎、即刻等）</option>
                 <option value="news">新闻资讯（传统媒体）</option>
                 <option value="tech">科技互联网（36氪、少数派、IT之家）</option>
                 <option value="developer">开发者（GitHub、Hacker News、掘金）</option>
                 <option value="finance">财经金融（财联社、金十数据、东方财富）</option>
-                <option value="crypto">加密货币（金色财经、律动、TokenInsight）</option>
                 <option value="entertainment">娱乐影视（豆瓣电影、B站）</option>
                 <option value="gaming">游戏电竞（Steam、TapTap）</option>
                 <option value="anime">动漫二次元（Bangumi、ACG资讯）</option>

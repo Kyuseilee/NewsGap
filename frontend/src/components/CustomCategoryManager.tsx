@@ -310,12 +310,11 @@ function CategoryEditor({ category, allSources, onClose, onSuccess }: CategoryEd
 
   // 行业分类中文映射
   const industryLabels: Record<string, string> = {
-    social: '社交媒体',
+    socialmedia: '社交媒体',
     news: '新闻资讯',
     tech: '科技互联网',
     developer: '开发者',
     finance: '财经金融',
-    crypto: '加密货币',
     entertainment: '娱乐影视',
     gaming: '游戏电竞',
     anime: '动漫二次元',

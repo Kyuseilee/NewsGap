@@ -10,55 +10,6 @@ async def add_missing_sources():
     db = Database()
     await db.initialize()
     
-    # Crypto 加密货币信息源
-    crypto_sources = [
-        Source(
-            name="金色财经",
-            url="https://rsshub.app/jinse/lives",
-            source_type=SourceType.RSS,
-            priority=SourcePriority.RSSHUB_STABLE,
-            industry=IndustryCategory.CRYPTO,
-            enabled=True,
-            fetch_interval_hours=6
-        ),
-        Source(
-            name="律动 BlockBeats - 快讯",
-            url="https://rsshub.app/theblockbeats/newsflash",
-            source_type=SourceType.RSS,
-            priority=SourcePriority.RSSHUB_STABLE,
-            industry=IndustryCategory.CRYPTO,
-            enabled=True,
-            fetch_interval_hours=6
-        ),
-        Source(
-            name="CoinDesk",
-            url="https://www.coindesk.com/arc/outboundfeeds/rss/",
-            source_type=SourceType.RSS,
-            priority=SourcePriority.OFFICIAL_RSS,
-            industry=IndustryCategory.CRYPTO,
-            enabled=True,
-            fetch_interval_hours=12
-        ),
-        Source(
-            name="Cointelegraph",
-            url="https://cointelegraph.com/rss",
-            source_type=SourceType.RSS,
-            priority=SourcePriority.OFFICIAL_RSS,
-            industry=IndustryCategory.CRYPTO,
-            enabled=True,
-            fetch_interval_hours=12
-        ),
-        Source(
-            name="Decrypt",
-            url="https://decrypt.co/feed",
-            source_type=SourceType.RSS,
-            priority=SourcePriority.OFFICIAL_RSS,
-            industry=IndustryCategory.CRYPTO,
-            enabled=True,
-            fetch_interval_hours=12
-        ),
-    ]
-    
     # Other 其他分类信息源
     other_sources = [
         Source(
@@ -90,7 +41,7 @@ async def add_missing_sources():
         ),
     ]
     
-    all_sources = crypto_sources + other_sources
+    all_sources = other_sources
     
     print(f"\n准备添加 {len(all_sources)} 个信息源...")
     print("-" * 60)
@@ -106,11 +57,9 @@ async def add_missing_sources():
     print("完成！\n")
     
     # 验证结果
-    crypto_count = len(await db.get_sources(industry=IndustryCategory.CRYPTO))
     other_count = len(await db.get_sources(industry=IndustryCategory.OTHER))
     
     print(f"当前状态：")
-    print(f"  crypto: {crypto_count} 个信息源")
     print(f"  other: {other_count} 个信息源")
     print()
 

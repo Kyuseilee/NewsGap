@@ -92,12 +92,11 @@ category_name:
 - `custom_crawler` - 自定义爬虫
 
 #### `industry` - 行业分类
-- `social` - 社交媒体
+- `socialmedia` - 社交媒体
 - `news` - 新闻资讯
 - `tech` - 科技互联网
 - `developer` - 开发者
 - `finance` - 财经金融
-- `crypto` - 加密货币
 - `entertainment` - 娱乐影视
 - `gaming` - 游戏电竞
 - `anime` - 动漫二次元
@@ -142,7 +141,6 @@ metadata:
   description: "描述信息"
   update_freq: "实时"      # 更新频率
   layer: 1                 # 信息层级（财经专用）
-  asset_class: "crypto"    # 资产类别
   customizable: true       # 是否可自定义
   warning: "注意事项"      # 警告信息
 ```

@@ -6,12 +6,11 @@ import type { Source } from '@/types/api'
 
 // 行业分类映射
 const INDUSTRY_CATEGORIES = {
-  social: '社交媒体',
+  socialmedia: '社交媒体',
   news: '新闻资讯',
   tech: '科技互联网',
   developer: '开发者',
   finance: '财经金融',
-  crypto: '加密货币',
   entertainment: '娱乐影视',
   gaming: '游戏电竞',
   anime: '动漫二次元',
@@ -32,7 +31,7 @@ function SourceEditor({ source, onClose }: SourceEditorProps) {
     name: source?.name || '',
     url: source?.url || '',
     source_type: source?.source_type || 'rss',
-    industry: source?.industry || 'social',
+    industry: source?.industry || 'socialmedia',
     enabled: source?.enabled ?? true,
   })
 
@@ -122,12 +121,11 @@ function SourceEditor({ source, onClose }: SourceEditorProps) {
                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                <option value="social">社交媒体</option>
+                <option value="socialmedia">社交媒体</option>
                 <option value="news">新闻资讯</option>
                 <option value="tech">科技互联网</option>
                 <option value="developer">开发者</option>
                 <option value="finance">财经金融</option>
-                <option value="crypto">加密货币</option>
                 <option value="entertainment">娱乐影视</option>
                 <option value="gaming">游戏电竞</option>
                 <option value="anime">动漫二次元</option>

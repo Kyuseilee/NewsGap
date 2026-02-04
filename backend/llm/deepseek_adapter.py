@@ -165,6 +165,9 @@ class DeepSeekAdapter(BaseLLMAdapter):
         # 获取品类特定的报告格式（传入analysis_type）
         report_format = prompt_manager.get_report_format_prompt(industry, analysis_type)
         
+        # 使用基类方法生成标题格式
+        title_format = self._get_report_title_format(industry)
+        
         return f"""{task_desc}
 
 {articles_text}
@@ -173,10 +176,10 @@ class DeepSeekAdapter(BaseLLMAdapter):
 
 {report_format}
 
-⚠️ **重要提醒**：
-1. 直接输出 Markdown 格式，不要用代码块包裹
-2. **必须完整输出所有章节**，不要中途截断
-3. 确保每个章节都有完整内容，包括结尾的总结
+⚠️ **输出要求**：
+- 报告标题格式：{title_format}
+- 直接输出 Markdown 格式，不要用代码块包裹
+- 必须完整输出所有章节，确保包含结尾总结
 4. 如果内容较长，请务必输出完整，不要省略
 """
     

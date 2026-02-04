@@ -23,12 +23,11 @@ class PromptManager:
         
         # 品类到文件名的映射
         self.industry_to_file = {
-            IndustryCategory.SOCIAL: "social.yaml",
+            IndustryCategory.SOCIAL: "socialmedia.yaml",
             IndustryCategory.NEWS: "news.yaml",
             IndustryCategory.TECH: "tech.yaml",
             IndustryCategory.DEVELOPER: "developer.yaml",
             IndustryCategory.FINANCE: "finance.yaml",
-            IndustryCategory.CRYPTO: "crypto.yaml",
             IndustryCategory.ENTERTAINMENT: "entertainment.yaml",
             IndustryCategory.GAMING: "gaming.yaml",
             IndustryCategory.ANIME: "anime.yaml",

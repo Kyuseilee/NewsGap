@@ -74,7 +74,7 @@ official_rss:
     url: "https://www.zhihu.com/rss"
     type: "rss"
     priority: "official_rss"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
 
   # BBC官方RSS
@@ -583,97 +583,6 @@ finance:
       quality: "政策动态"
 
 
-# ==================== 加密货币源 ====================
-crypto:
-  # 金色财经
-  - name: "金色财经-政策"
-    url: "http://localhost:1200/jinse/zhengce"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "加密货币政策动态"
-      layer: 1
-      quality: "核心动态"
-      asset_class: "crypto"
-
-  - name: "金色财经-实时"
-    url: "http://localhost:1200/jinse/lives"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "加密市场实时快讯"
-      update_freq: "实时"
-      layer: 1
-      quality: "核心动态"
-      asset_class: "crypto"
-
-  # 律动 BlockBeats
-  - name: "律动快讯"
-    url: "http://localhost:1200/theblockbeats/newsflash"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "加密货币快讯"
-      layer: 1
-      quality: "核心动态"
-      asset_class: "crypto"
-
-  - name: "律动文章"
-    url: "http://localhost:1200/theblockbeats/article"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "加密货币深度报道"
-      layer: 2
-      quality: "深度洞察"
-      asset_class: "crypto"
-
-  # TokenInsight
-  - name: "TokenInsight研究报告"
-    url: "http://localhost:1200/tokeninsight/report/zh"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "链上数据洞察/研究报告"
-      layer: 2
-      quality: "深度洞察"
-      asset_class: "crypto"
-
-  # Followin
-  - name: "Followin新闻"
-    url: "http://localhost:1200/followin/news/en"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "Web3英文新闻聚合"
-      layer: 1
-      asset_class: "crypto"
-
-  # Paradigm
-  - name: "Paradigm研究"
-    url: "http://localhost:1200/paradigm/writing"
-    type: "rss"
-    priority: "rsshub_stable"
-    industry: "crypto"
-    enabled: true
-    metadata:
-      description: "Paradigm投资研究"
-      layer: 2
-      asset_class: "crypto"
-
-
 # ==================== 通用信息源（RSSHub）====================
 general:
   # ===== 社交媒体 Social Media =====
@@ -681,7 +590,7 @@ general:
     url: "http://localhost:1200/weibo/search/hot"
     type: "rss"
     priority: "rsshub_stable"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
     metadata:
       description: "微博实时热搜话题"
@@ -690,7 +599,7 @@ general:
     url: "http://localhost:1200/zhihu/hotlist"
     type: "rss"
     priority: "rsshub_stable"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
     metadata:
       description: "知乎热门问题"
@@ -699,7 +608,7 @@ general:
     url: "http://localhost:1200/zhihu/daily"
     type: "rss"
     priority: "rsshub_stable"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
     metadata:
       description: "知乎精选文章"
@@ -708,7 +617,7 @@ general:
     url: "http://localhost:1200/jike/topic/553870e8e4b0cd50b29f3262"
     type: "rss"
     priority: "rsshub_stable"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
     metadata:
       description: "即刻互联网人主题"
@@ -727,7 +636,7 @@ general:
     url: "http://localhost:1200/douban/group/hot"
     type: "rss"
     priority: "rsshub_stable"
-    industry: "social"
+    industry: "socialmedia"
     enabled: true
     metadata:
       description: "豆瓣小组热门话题"
