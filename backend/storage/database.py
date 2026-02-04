@@ -317,14 +317,15 @@ class Database(StorageInterface, CustomCategoryDB):
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("""
                 INSERT OR REPLACE INTO analyses (
-                    id, analysis_type, executive_brief, markdown_report,
+                    id, analysis_type, industry, executive_brief, markdown_report,
                     trends, signals, information_gaps,
                     llm_backend, llm_model, token_usage, estimated_cost,
                     created_at, processing_time_seconds,
                     user_rating, user_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 analysis.id, analysis.analysis_type.value,
+                analysis.industry.value if analysis.industry else 'other',
                 analysis.executive_brief,
                 analysis.markdown_report,  # 添加 markdown_report
                 json.dumps([t.model_dump() for t in analysis.trends]),
@@ -436,10 +437,19 @@ class Database(StorageInterface, CustomCategoryDB):
         """将数据库行转换为 Analysis 对象"""
         from models import Trend, Signal, InformationGap
         
+        # 处理 industry 字段
+        industry = None
+        if 'industry' in row.keys() and row['industry']:
+            try:
+                industry = IndustryCategory(row['industry'])
+            except (ValueError, KeyError):
+                industry = IndustryCategory.OTHER
+        
         return Analysis(
             id=row['id'],
             analysis_type=AnalysisType(row['analysis_type']),
             article_ids=article_ids,
+            industry=industry,
             executive_brief=row['executive_brief'],
             markdown_report=row['markdown_report'] if row['markdown_report'] else None,
             trends=[Trend(**t) for t in json.loads(row['trends'])] if row['trends'] else [],

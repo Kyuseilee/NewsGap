@@ -82,6 +82,10 @@ class Analyzer:
             industry=industry
         )
         
+        # 设置行业分类到分析结果中
+        if industry:
+            analysis.industry = industry
+        
         return analysis
     
     def estimate_cost(self, articles: List[Article]) -> dict:

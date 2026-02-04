@@ -174,6 +174,9 @@ class Analysis(BaseModel):
     # 关联的文章
     article_ids: List[str] = Field(..., min_items=1)
     
+    # 行业分类（从关联文章推断）
+    industry: Optional[IndustryCategory] = None
+    
     # 分析结果
     executive_brief: str  # 执行摘要（总是生成）
     markdown_report: Optional[str] = None  # 完整的Markdown格式报告
