@@ -61,6 +61,8 @@ class DeepSeekAdapter(BaseLLMAdapter):
         start_time = datetime.now()
         
         # 调用 DeepSeek API（生成Markdown而不是JSON）
+        # 注意: max_tokens 的有效范围是 [1, 8192]
+        # deepseek-chat 最大输出 8K, deepseek-reasoner 默认 32K 但 API 参数上限是 8192
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -68,7 +70,7 @@ class DeepSeekAdapter(BaseLLMAdapter):
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            max_tokens=64000  # DeepSeek-V3 支持最大64K输出tokens
+            max_tokens=8192  # API参数上限为8192
         )
         
         processing_time = (datetime.now() - start_time).total_seconds()
@@ -175,6 +177,6 @@ class DeepSeekAdapter(BaseLLMAdapter):
         return {
             'backend': 'deepseek',
             'model': self.model,
-            'max_tokens': 64000,
+            'max_tokens': 8192,  # API 参数上限
             'cost_per_1k_tokens': 0.00014  # DeepSeek 价格非常低
         }
