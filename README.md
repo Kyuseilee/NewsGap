@@ -58,7 +58,7 @@ NewsGap/
 - **Node.js**: 18+
 - **系统**: macOS/Linux/Windows
 
-### 一键部署（推荐）
+### 本地开发
 
 ```bash
 # 1. 克隆项目
@@ -79,6 +79,28 @@ export DEEPSEEK_API_KEY="sk-your-deepseek-key"    # 性价比高
 # 5. 访问应用
 open http://localhost:5173
 ```
+
+### 生产部署
+
+如需部署到服务器（支持公网访问）：
+
+```bash
+# 1. 克隆server分支
+git clone -b server <repository-url>
+cd NewsGap
+
+# 2. 运行生产部署脚本
+chmod +x deploy-production.sh
+./deploy-production.sh
+
+# 3. 配置API Keys
+nano backend/.env
+
+# 4. 重启服务
+sudo systemctl restart newsgap-backend
+```
+
+📖 **详细部署文档**: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ### 手动部署
 

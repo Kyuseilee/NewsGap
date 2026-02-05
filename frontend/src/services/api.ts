@@ -17,6 +17,10 @@ import type {
   UpdateCustomCategoryRequest,
 } from '@/types/api'
 
+// API基础URL配置
+// 开发环境: http://localhost:8000
+// 生产环境: 从环境变量读取（通过.env.production配置）
+// 使用Nginx反向代理时: /api（相对路径）
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 const client = axios.create({

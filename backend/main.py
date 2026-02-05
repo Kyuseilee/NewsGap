@@ -6,18 +6,23 @@ NewsGap FastAPI 后端主应用
 """
 
 import logging
+import os
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 
 from routes import fetch, analyze, intelligence, articles, config, analyses, custom_categories, export
 from storage.database import Database
 
+# 加载环境变量
+load_dotenv()
 
 # 配置日志格式（添加时间戳）
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, LOG_LEVEL),
     format='[%(asctime)s] %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
@@ -92,14 +97,28 @@ app = FastAPI(
 )
 
 # CORS 配置（允许前端访问）
+# 从环境变量读取允许的域名，默认包含本地开发环境
+allowed_origins_env = os.getenv('ALLOWED_ORIGINS', '')
+allowed_origins = [
+    "http://localhost:5173",      # Vite 开发服务器
+    "http://localhost:1420",      # Tauri 默认端口
+    "tauri://localhost",
+    "http://127.0.0.1:5173",
+]
+
+# 添加环境变量中配置的域名
+if allowed_origins_env:
+    allowed_origins.extend([origin.strip() for origin in allowed_origins_env.split(',') if origin.strip()])
+
+# 生产环境：允许所有来源（简化部署，如需严格控制请配置ALLOWED_ORIGINS环境变量）
+if os.getenv('ENV') == 'production':
+    allowed_origins.append("*")
+
+log(f"📡 CORS允许的域名: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",      # Vite 开发服务器
-        "http://localhost:1420",      # Tauri 默认端口
-        "tauri://localhost",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
