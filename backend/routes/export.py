@@ -47,8 +47,45 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         from reportlab.pdfbase import pdfmetrics
         from reportlab.pdfbase.ttfonts import TTFont
         from reportlab.lib.colors import HexColor
+        import platform
     except ImportError:
         raise ImportError("reportlab not installed. Please install: pip install reportlab")
+    
+    # 注册中文字体
+    system = platform.system()
+    if system == 'Darwin':  # macOS
+        try:
+            pdfmetrics.registerFont(TTFont('STHeiti', '/System/Library/Fonts/STHeiti Medium.ttc', subfontIndex=0))
+            pdfmetrics.registerFont(TTFont('Songti', '/System/Library/Fonts/Supplemental/Songti.ttc', subfontIndex=0))
+            chinese_font = 'STHeiti'
+            chinese_font_bold = 'STHeiti'
+        except:
+            logger.warning("无法加载系统中文字体，尝试使用默认字体")
+            chinese_font = 'Helvetica'
+            chinese_font_bold = 'Helvetica-Bold'
+    elif system == 'Linux':
+        try:
+            # Linux常见中文字体路径
+            pdfmetrics.registerFont(TTFont('NotoSansCJK', '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', subfontIndex=0))
+            chinese_font = 'NotoSansCJK'
+            chinese_font_bold = 'NotoSansCJK'
+        except:
+            logger.warning("无法加载中文字体，尝试使用默认字体")
+            chinese_font = 'Helvetica'
+            chinese_font_bold = 'Helvetica-Bold'
+    elif system == 'Windows':
+        try:
+            pdfmetrics.registerFont(TTFont('SimHei', 'C:\\Windows\\Fonts\\simhei.ttf'))
+            pdfmetrics.registerFont(TTFont('SimSun', 'C:\\Windows\\Fonts\\simsun.ttc', subfontIndex=0))
+            chinese_font = 'SimHei'
+            chinese_font_bold = 'SimHei'
+        except:
+            logger.warning("无法加载中文字体，尝试使用默认字体")
+            chinese_font = 'Helvetica'
+            chinese_font_bold = 'Helvetica-Bold'
+    else:
+        chinese_font = 'Helvetica'
+        chinese_font_bold = 'Helvetica-Bold'
     
     # 创建字节流
     buffer = BytesIO()
@@ -74,7 +111,7 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         textColor=HexColor('#1a1a1a'),
         spaceAfter=12,
         alignment=TA_LEFT,
-        fontName='Helvetica-Bold'
+        fontName=chinese_font_bold
     )
     
     # H2样式
@@ -85,7 +122,7 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         textColor=HexColor('#1a1a1a'),
         spaceBefore=16,
         spaceAfter=8,
-        fontName='Helvetica-Bold'
+        fontName=chinese_font_bold
     )
     
     # H3样式
@@ -96,7 +133,7 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         textColor=HexColor('#374151'),
         spaceBefore=12,
         spaceAfter=6,
-        fontName='Helvetica-Bold'
+        fontName=chinese_font_bold
     )
     
     # 正文样式
@@ -107,7 +144,7 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         leading=16,
         textColor=HexColor('#333333'),
         alignment=TA_JUSTIFY,
-        fontName='Helvetica'
+        fontName=chinese_font
     )
     
     # 代码样式
@@ -131,7 +168,7 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         borderColor=HexColor('#2563eb'),
         borderWidth=2,
         borderPadding=10,
-        fontName='Helvetica-Oblique'
+        fontName=chinese_font
     )
     
     # 构建文档内容
@@ -160,8 +197,8 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         ('BACKGROUND', (0, 0), (0, -1), HexColor('#f3f4f6')),
         ('TEXTCOLOR', (0, 0), (-1, -1), HexColor('#1a1a1a')),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 0), (0, -1), chinese_font_bold),
+        ('FONTNAME', (1, 0), (1, -1), chinese_font),
         ('FONTSIZE', (0, 0), (-1, -1), 9),
         ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#d1d5db')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
