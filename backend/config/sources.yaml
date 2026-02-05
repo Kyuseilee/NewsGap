@@ -641,6 +641,296 @@ general:
     metadata:
       description: "豆瓣小组热门话题"
 
+  # ===== B站内容生态（年轻人风向标）=====
+  - name: "B站综合热门"
+    url: "http://localhost:1200/bilibili/popular/all"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "B站全站综合热门内容"
+      layer: 1
+      quality: "核心趋势"
+      update_freq: "实时"
+      value: "Z世代内容消费风向标，跨品类趋势信号，反映年轻群体关注焦点"
+
+  - name: "B站每周必看"
+    url: "http://localhost:1200/bilibili/weekly"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "B站官方精选的周度最佳内容"
+      layer: 1
+      quality: "编辑精选"
+      update_freq: "每周"
+      value: "高质量深度内容，过滤短期噪音，捕捉中期趋势变化"
+
+  - name: "B站热搜"
+    url: "http://localhost:1200/bilibili/hot-search"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "B站实时热搜话题"
+      layer: 1
+      quality: "实时热点"
+      update_freq: "实时"
+      value: "游戏/科技倾斜，突发事件预警，年轻人消费决策参考"
+      warning: "需要Puppeteer支持，当前RSSHub实例未安装Chrome，暂时禁用"
+
+  # ===== 科技数码社区 =====
+  - name: "酷安热榜-每日热门"
+    url: "http://localhost:1200/coolapk/hot/jrrm/daily"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "酷安数码玩家社区每日热门"
+      layer: 1
+      quality: "垂直专业"
+      update_freq: "每日"
+      value: "科技数码专精社区，开发者和技术爱好者聚集地，产品口碑风向"
+
+  # ===== 文化消费指标 =====
+  - name: "豆瓣一周口碑榜"
+    url: "http://localhost:1200/douban/movie/weekly"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "豆瓣电影周度口碑榜"
+      layer: 1
+      quality: "质量筛选"
+      update_freq: "每周"
+      value: "文化消费指标，内容产业信号，影视行业投资参考"
+
+  # ===== 开发者社区国际视野 =====
+  - name: "Daily.dev-最多讨论"
+    url: "http://localhost:1200/daily/discussed"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "Daily.dev全球开发者最多讨论的技术文章"
+      layer: 1
+      quality: "话题热度"
+      update_freq: "实时"
+      value: "全球技术社区关注焦点，技术趋势预判，补充国内开发者社区视角"
+
+  - name: "Daily.dev-最多点赞"
+    url: "http://localhost:1200/daily/upvoted"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "Daily.dev最多点赞的优质技术内容"
+      layer: 1
+      quality: "内容质量"
+      update_freq: "实时"
+      value: "高赞技术文章，实用性和认可度保证，开发者学习资源"
+
+  # ===== 国际社交媒体平台（需要配置）=====
+  
+  # Twitter/X
+  - name: "Twitter-埃隆马斯克"
+    url: "http://localhost:1200/twitter/user/elonmusk"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "埃隆·马斯克的推特动态"
+      layer: 2
+      quality: "KOL动态"
+      value: "科技行业风向标，商业决策参考"
+      warning: "需要配置Twitter用户名和密码"
+      config_required: "TWITTER_USERNAME, TWITTER_PASSWORD"
+      customizable: true
+
+  - name: "Twitter热门趋势"
+    url: "http://localhost:1200/twitter/trends/23424977"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "Twitter美国地区热门趋势"
+      layer: 1
+      quality: "实时热点"
+      value: "全球热点话题，国际舆情监测"
+      warning: "可能需要代理访问"
+      note: "WOEID 23424977=美国，可修改为其他地区"
+
+  # Instagram
+  - name: "Instagram-热门科技"
+    url: "http://localhost:1200/picuki/tag/technology"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "Instagram科技标签热门内容"
+      layer: 2
+      quality: "视觉内容"
+      value: "海外科技产品视觉营销趋势"
+      warning: "严格反爬，建议配置Cookie，依赖第三方服务Picuki"
+      alternative: "可用instagram路由但需配置凭证"
+
+  # TikTok
+  - name: "TikTok-热门科技博主"
+    url: "http://localhost:1200/tiktok/user/@linustech/true"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "TikTok科技博主LinusTechTips"
+      layer: 2
+      quality: "短视频内容"
+      value: "海外科技短视频趋势，产品评测"
+      warning: "依赖Puppeteer，需要Chrome支持，反爬严重"
+      config_required: "Puppeteer环境"
+      customizable: true
+
+  # YouTube
+  - name: "YouTube-MKBHD频道"
+    url: "http://localhost:1200/youtube/user/@mkbhd"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "YouTube顶级科技评测频道MKBHD"
+      layer: 2
+      quality: "长视频内容"
+      value: "权威科技产品评测，消费决策参考"
+      note: "YouTube官方RSS相对稳定，测试可用"
+      customizable: true
+
+  - name: "YouTube-LinusTechTips"
+    url: "http://localhost:1200/youtube/user/@LinusTechTips"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "YouTube科技频道LinusTechTips"
+      layer: 2
+      quality: "长视频内容"
+      value: "PC硬件评测，DIY玩家指南"
+      note: "测试可用"
+      customizable: true
+
+  - name: "YouTube音乐热门榜"
+    url: "http://localhost:1200/youtube/charts/0/US"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "YouTube美国地区音乐热门榜"
+      layer: 3
+      quality: "内容排行"
+      value: "全球音乐流行趋势"
+      note: "可修改国家代码获取不同地区榜单"
+
+  # ===== 微博增强订阅（需要配置）=====
+  
+  - name: "微博-雷军"
+    url: "http://localhost:1200/weibo/user/1749127163"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "雷军的微博动态"
+      layer: 2
+      quality: "KOL动态"
+      value: "小米生态、科技行业决策参考"
+      warning: "严格反爬，可能需要Cookie"
+      customizable: true
+
+  - name: "微博-何同学"
+    url: "http://localhost:1200/weibo/user/2028045391"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "科技UP主何同学的微博"
+      layer: 2
+      quality: "KOL动态"
+      value: "年轻人科技视角，产品创新趋势"
+      warning: "严格反爬，可能需要Cookie"
+      customizable: true
+
+  - name: "微博超话-人工智能"
+    url: "http://localhost:1200/weibo/super_index/1008084989d223732bf6f02f75ea30efad58a9"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "微博人工智能超话"
+      layer: 2
+      quality: "话题讨论"
+      value: "AI领域大众讨论热度，舆情监测"
+      warning: "严格反爬，建议禁用或配置Cookie"
+      note: "可按热门/最新排序"
+
+  - name: "微博关键词-ChatGPT"
+    url: "http://localhost:1200/weibo/keyword/ChatGPT"
+    type: "rss"
+    priority: "rsshub_high_risk"
+    industry: "socialmedia"
+    enabled: false
+    metadata:
+      description: "微博关键词搜索ChatGPT"
+      layer: 2
+      quality: "话题追踪"
+      value: "特定话题的实时讨论追踪"
+      warning: "反爬严重，可能频繁失效"
+      customizable: true
+
+  # ===== Telegram公开频道 =====
+  
+  - name: "Telegram-RSSHub官方频道"
+    url: "http://localhost:1200/telegram/channel/awesomeRSSHub"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "RSSHub官方Telegram频道"
+      layer: 3
+      quality: "项目动态"
+      value: "RSSHub功能更新、新路由发布"
+      note: "Telegram RSS相对稳定"
+
+  # ===== Threads =====
+  
+  - name: "Threads-扎克伯格"
+    url: "http://localhost:1200/threads/zuck"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "socialmedia"
+    enabled: true
+    metadata:
+      description: "扎克伯格的Threads动态"
+      layer: 2
+      quality: "KOL动态"
+      value: "Meta/Facebook战略决策参考"
+      note: "测试可用"
+      customizable: true
+
   # ===== 新闻媒体 News =====
   - name: "联合早报-中港台"
     url: "http://localhost:1200/zaobao/realtime/china"
@@ -786,6 +1076,20 @@ general:
     metadata:
       description: "法广中文"
 
+  - name: "AP News 美联社主站"
+    url: "http://localhost:1200/apnews/topics"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "news"
+    enabled: true
+    metadata:
+      description: "全球通讯社标杆，最客观最及时的国际新闻"
+      layer: 1
+      quality: "核心新闻"
+      value: "重大新闻第一信息源，突发事件首选，全方位报道"
+      test_result: "✅ 测试成功，40条RSS"
+      note: "比现有美联社-国际源覆盖更全面"
+
   # ===== 科技媒体 Tech =====
   - name: "虎嗅网"
     url: "http://localhost:1200/huxiu/article"
@@ -922,6 +1226,89 @@ general:
     enabled: false
     metadata:
       description: "Node.js周刊"
+
+  # ===== AI/机器学习 =====
+  - name: "Huggingface Daily Papers"
+    url: "http://localhost:1200/huggingface/daily-papers"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "每日精选最新AI论文（ArXiv热门）"
+      layer: 1
+      quality: "AI前沿"
+      value: "Huggingface权威平台，自动筛选热门AI论文"
+      test_result: "✅ 33条RSS"
+
+  - name: "北京智源AI研究院"
+    url: "http://localhost:1200/baai/hub"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "中国顶级AI研究机构官方动态"
+      layer: 1
+      quality: "国内AI研究"
+      value: "悟道、智源系列模型，研究成果和技术报告"
+      test_result: "✅ 6条RSS"
+
+  # ===== 开源社区 =====
+  - name: "HelloGitHub"
+    url: "http://localhost:1200/hellogithub/volume"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "每月精选优质开源项目"
+      layer: 1
+      quality: "开源精选"
+      value: "中文友好，人工筛选，高质量开源项目推荐"
+      test_result: "✅ 10条RSS"
+
+  - name: "GitHub Topics - AI"
+    url: "http://localhost:1200/github/topics/artificial-intelligence"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "AI主题的GitHub项目更新"
+      layer: 1
+      quality: "AI开源"
+      value: "按star和活跃度排序，全球AI开源项目"
+      test_result: "✅ 20条RSS"
+      customizable: true
+
+  # ===== 技术社区 =====
+  - name: "V2EX 最热主题"
+    url: "http://localhost:1200/v2ex/topics/hot"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "V2EX最热话题聚合"
+      layer: 1
+      quality: "社区热点"
+      value: "技术讨论、职场分享、产品体验"
+      test_result: "✅ 9条RSS"
+      note: "补充V2EX官方RSS（热门过滤版）"
+
+  - name: "印记中文 - 技术周刊"
+    url: "http://localhost:1200/docschina/weekly"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "developer"
+    enabled: true
+    metadata:
+      description: "汇总前端、Node.js等技术周刊"
+      layer: 1
+      quality: "技术周刊"
+      value: "高质量技术文章和资源，中文翻译社区"
+      test_result: "✅ 10条RSS"
 
   # ===== 娱乐影视 Entertainment =====
   - name: "B站全站排行榜"
