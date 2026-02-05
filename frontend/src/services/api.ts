@@ -211,4 +211,12 @@ export const api = {
     const { data } = await client.delete('/api/config/proxy')
     return data
   },
+
+  // 导出相关
+  exportAnalysisPDF: async (analysisId: string): Promise<Blob> => {
+    const { data } = await client.get(`/api/export/analysis/${analysisId}/pdf`, {
+      responseType: 'blob',
+    })
+    return data
+  },
 }

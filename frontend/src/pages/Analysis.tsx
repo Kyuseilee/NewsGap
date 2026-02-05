@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Clock, DollarSign, Zap, Info, ArrowLeft, Copy, Check } from 'lucide-react'
+import { Clock, DollarSign, Zap, Info, ArrowLeft, Copy, Check, Download } from 'lucide-react'
 import { api } from '@/services/api'
 import AnalysisMarkdown from '@/components/AnalysisMarkdown'
 import type { Article } from '@/types/api'
@@ -10,6 +10,7 @@ export default function AnalysisPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const { data: analysis, isLoading, error } = useQuery({
     queryKey: ['analysis', id],
@@ -40,6 +41,32 @@ export default function AnalysisPage() {
       navigator.clipboard.writeText(analysis.markdown_report)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!id) return
+    
+    setExporting(true)
+    try {
+      const blob = await api.exportAnalysisPDF(id)
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `analysis_${id.substring(0, 8)}_${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      
+      // 清理
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('导出PDF失败:', error)
+      alert('导出PDF失败，请稍后重试')
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -120,23 +147,43 @@ export default function AnalysisPage() {
             )}
           </div>
 
-          <button
-            onClick={handleCopy}
-            disabled={!analysis.markdown_report}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {copied ? (
-              <>
-                <Check size={18} />
-                已复制
-              </>
-            ) : (
-              <>
-                <Copy size={18} />
-                复制报告
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportPDF}
+              disabled={!analysis?.markdown_report || exporting}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {exporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  导出中...
+                </>
+              ) : (
+                <>
+                  <Download size={18} />
+                  导出PDF
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleCopy}
+              disabled={!analysis.markdown_report}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {copied ? (
+                <>
+                  <Check size={18} />
+                  已复制
+                </>
+              ) : (
+                <>
+                  <Copy size={18} />
+                  复制报告
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* 报告内容 */}
