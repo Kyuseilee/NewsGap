@@ -980,6 +980,54 @@ general:
       customizable: true
 
   # ===== 游戏 Gaming =====
+  
+  # ===== Layer 1: 游戏折扣与免费游戏（高价值，玩家最关注）=====
+  
+  - name: "Epic Games免费游戏"
+    url: "http://localhost:1200/epicgames/freegames"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "Epic每周免费游戏"
+      layer: 1
+      quality: "游戏推荐"
+      update_freq: "每周"
+
+  - name: "JUMP游戏折扣-Switch"
+    url: "http://localhost:1200/jump/discount/switch/jx"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: false
+    metadata:
+      description: "Switch精选游戏折扣"
+      layer: 1
+      quality: "游戏推荐"
+
+  - name: "JUMP游戏折扣-PS5"
+    url: "http://localhost:1200/jump/discount/ps5/jx"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: false
+    metadata:
+      description: "PS5精选游戏折扣"
+      layer: 1
+      quality: "游戏推荐"
+
+  - name: "JUMP游戏折扣-Steam"
+    url: "http://localhost:1200/jump/discount/steam/jx"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: false
+    metadata:
+      description: "Steam精选游戏折扣"
+      layer: 1
+      quality: "游戏推荐"
+
   - name: "Steam特惠"
     url: "http://localhost:1200/steam/search/specials=1"
     type: "rss"
@@ -988,33 +1036,65 @@ general:
     enabled: true
     metadata:
       description: "Steam促销游戏"
+      layer: 1
+      quality: "游戏推荐"
 
-  - name: "TapTap热门"
-    url: "http://localhost:1200/taptap/top"
+  - name: "游戏打折情报-Steam热门中文"
+    url: "http://localhost:1200/yxdzqb/popular_cn"
     type: "rss"
     priority: "rsshub_stable"
     industry: "gaming"
     enabled: true
     metadata:
-      description: "TapTap热门游戏"
+      description: "Steam热门中文游戏折扣"
+      layer: 1
+      quality: "游戏推荐"
 
-  - name: "游研社"
-    url: "http://localhost:1200/yystv/category/recommend"
+  - name: "游戏打折情报-Steam历史低价"
+    url: "http://localhost:1200/yxdzqb/low"
     type: "rss"
     priority: "rsshub_stable"
     industry: "gaming"
     enabled: true
     metadata:
-      description: "游研社推荐"
+      description: "Steam游戏历史低价"
+      layer: 1
+      quality: "游戏推荐"
 
-  - name: "3DM游戏新闻"
-    url: "http://localhost:1200/3dm/news"
+  # ===== Layer 1: 主机游戏官方新闻 =====
+  
+  - name: "Nintendo Direct"
+    url: "http://localhost:1200/nintendo/direct"
     type: "rss"
     priority: "rsshub_stable"
     industry: "gaming"
     enabled: true
     metadata:
-      description: "3DM游戏资讯"
+      description: "任天堂直面会官方发布"
+      layer: 1
+      quality: "官方新闻"
+
+  - name: "Nintendo香港新闻"
+    url: "http://localhost:1200/nintendo/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "任天堂香港地区新闻"
+      layer: 1
+      quality: "官方新闻"
+
+  - name: "PlayStation月度免费游戏"
+    url: "http://localhost:1200/ps/monthly-games"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: false
+    metadata:
+      description: "PS Plus会员月度免费游戏"
+      layer: 1
+      quality: "游戏推荐"
 
   - name: "PlayStation中国"
     url: "http://localhost:1200/playstation/news"
@@ -1024,6 +1104,146 @@ general:
     enabled: true
     metadata:
       description: "PlayStation官方新闻"
+      layer: 1
+      quality: "官方新闻"
+
+  - name: "Blizzard暴雪游戏"
+    url: "http://localhost:1200/blizzard/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "暴雪游戏官方新闻"
+      layer: 1
+      quality: "官方新闻"
+
+  # ===== Layer 1: 电竞赛事 =====
+  
+  - name: "完美世界电竞-Dota2"
+    url: "http://localhost:1200/wmpvp/news/1"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "Dota2官方赛事资讯"
+      layer: 1
+      quality: "电竞赛事"
+
+  - name: "完美世界电竞-CS2"
+    url: "http://localhost:1200/wmpvp/news/2"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "CS2官方赛事资讯"
+      layer: 1
+      quality: "电竞赛事"
+
+  # ===== Layer 2: 游戏新闻聚合与媒体 =====
+  
+  - name: "游研社推荐"
+    url: "http://localhost:1200/yystv/category/recommend"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: false
+    metadata:
+      description: "游研社游戏推荐"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "游研社全部文章"
+    url: "http://localhost:1200/yystv/docs"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游研社全部文章"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "游讯网精彩推荐"
+    url: "http://localhost:1200/yxdown/recommend"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游讯网精彩内容推荐"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "游讯网资讯"
+    url: "http://localhost:1200/yxdown/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游讯网综合游戏资讯"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "3DMGame游戏新闻"
+    url: "http://localhost:1200/3dmgame/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "3DMGame游戏资讯"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "4Gamers限时免费"
+    url: "http://localhost:1200/4gamers/tag/限時免費"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "4Gamers限时免费游戏标签"
+      layer: 2
+      quality: "游戏推荐"
+
+  - name: "游戏基因资讯"
+    url: "http://localhost:1200/gamegene/news"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游戏基因资讯"
+      layer: 2
+      quality: "游戏新闻"
+
+  - name: "游戏日报"
+    url: "http://localhost:1200/yxrb/info"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "游戏日报资讯"
+      layer: 2
+      quality: "游戏新闻"
+
+  # ===== Layer 3: 游戏社区与特定游戏 =====
+  
+  - name: "TapTap热门"
+    url: "http://localhost:1200/taptap/top"
+    type: "rss"
+    priority: "rsshub_stable"
+    industry: "gaming"
+    enabled: true
+    metadata:
+      description: "TapTap热门游戏"
+      layer: 3
+      quality: "社区热点"
 
   # ===== 动漫二次元 Anime =====
   - name: "Bangumi 番组计划"

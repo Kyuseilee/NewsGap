@@ -231,23 +231,49 @@ class Database(StorageInterface, CustomCategoryDB):
     # ========================================================================
     
     async def save_source(self, source: Source) -> str:
-        """保存信息源"""
-        if source.id is None:
-            source.id = str(uuid.uuid4())
-        
+        """保存信息源 - 根据URL进行upsert，避免重复"""
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
-                INSERT OR REPLACE INTO sources (
-                    id, name, url, source_type, industry, enabled,
-                    fetch_interval_hours, last_fetched_at, metadata
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                source.id, source.name, source.url,
-                source.source_type.value, source.industry.value,
-                1 if source.enabled else 0,
-                source.fetch_interval_hours, source.last_fetched_at,
-                json.dumps(source.metadata) if source.metadata else None
-            ))
+            db.row_factory = aiosqlite.Row
+            
+            # 先查找是否已存在相同URL的源
+            cursor = await db.execute(
+                "SELECT id FROM sources WHERE url = ? LIMIT 1",
+                (source.url,)
+            )
+            existing_row = await cursor.fetchone()
+            
+            if existing_row:
+                # 存在则更新，使用已有的ID
+                source.id = existing_row['id']
+                await db.execute("""
+                    UPDATE sources SET
+                        name = ?, source_type = ?, industry = ?, enabled = ?,
+                        fetch_interval_hours = ?, last_fetched_at = ?, metadata = ?
+                    WHERE id = ?
+                """, (
+                    source.name, source.source_type.value, source.industry.value,
+                    1 if source.enabled else 0,
+                    source.fetch_interval_hours, source.last_fetched_at,
+                    json.dumps(source.metadata) if source.metadata else None,
+                    source.id
+                ))
+            else:
+                # 不存在则插入，生成新ID
+                if source.id is None:
+                    source.id = str(uuid.uuid4())
+                await db.execute("""
+                    INSERT INTO sources (
+                        id, name, url, source_type, industry, enabled,
+                        fetch_interval_hours, last_fetched_at, metadata
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    source.id, source.name, source.url,
+                    source.source_type.value, source.industry.value,
+                    1 if source.enabled else 0,
+                    source.fetch_interval_hours, source.last_fetched_at,
+                    json.dumps(source.metadata) if source.metadata else None
+                ))
+            
             await db.commit()
         
         return source.id
