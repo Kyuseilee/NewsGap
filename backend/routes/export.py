@@ -42,7 +42,10 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import cm
         from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+        from reportlab.platypus import (
+            SimpleDocTemplate, Paragraph, Spacer, PageBreak, 
+            Table, TableStyle, Preformatted, HRFlowable
+        )
         from reportlab.lib import colors
         from reportlab.pdfbase import pdfmetrics
         from reportlab.pdfbase.ttfonts import TTFont
@@ -214,60 +217,121 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
     # 解析Markdown并转换为PDF元素
     lines = markdown_text.split('\n')
     i = 0
+    in_list = False
+    list_items = []
+    
+    def flush_list():
+        """输出累积的列表项"""
+        nonlocal in_list, list_items
+        if list_items:
+            for item in list_items:
+                story.append(item)
+            list_items = []
+        in_list = False
     
     while i < len(lines):
-        line = lines[i].strip()
+        line = lines[i]
+        stripped = line.strip()
         
-        if not line:
+        # 空行
+        if not stripped:
+            flush_list()
             story.append(Spacer(1, 0.3*cm))
             i += 1
             continue
         
-        # 标题
-        if line.startswith('# '):
-            text = line[2:].strip()
-            story.append(Paragraph(escape_html(text), title_style))
-        elif line.startswith('## '):
-            text = line[3:].strip()
-            story.append(Paragraph(escape_html(text), h2_style))
-        elif line.startswith('### '):
-            text = line[4:].strip()
-            story.append(Paragraph(escape_html(text), h3_style))
+        # 标题（必须在行首，清除列表）
+        if stripped.startswith('# '):
+            flush_list()
+            text = stripped[2:].strip()
+            story.append(Spacer(1, 0.2*cm))
+            story.append(Paragraph(process_inline_markdown(text), title_style))
+            story.append(Spacer(1, 0.2*cm))
+        elif stripped.startswith('## '):
+            flush_list()
+            text = stripped[3:].strip()
+            story.append(Spacer(1, 0.15*cm))
+            story.append(Paragraph(process_inline_markdown(text), h2_style))
+        elif stripped.startswith('### '):
+            flush_list()
+            text = stripped[4:].strip()
+            story.append(Paragraph(process_inline_markdown(text), h3_style))
+        elif stripped.startswith('#### '):
+            flush_list()
+            text = stripped[5:].strip()
+            story.append(Paragraph(process_inline_markdown(text), h3_style))
         
         # 代码块
-        elif line.startswith('```'):
+        elif stripped.startswith('```'):
+            flush_list()
             code_lines = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith('```'):
                 code_lines.append(lines[i])
                 i += 1
-            code_text = '\n'.join(code_lines)
-            story.append(Paragraph(f"<pre>{escape_html(code_text)}</pre>", code_style))
+            if code_lines:
+                code_text = '\n'.join(code_lines)
+                # 使用Preformatted保持格式
+                from reportlab.platypus import Preformatted
+                story.append(Spacer(1, 0.2*cm))
+                story.append(Preformatted(escape_html(code_text), code_style))
+                story.append(Spacer(1, 0.2*cm))
         
-        # 引用
-        elif line.startswith('>'):
-            quote_text = line[1:].strip()
-            story.append(Paragraph(escape_html(quote_text), quote_style))
+        # 引用块
+        elif stripped.startswith('>'):
+            flush_list()
+            quote_text = stripped[1:].strip()
+            story.append(Paragraph(process_inline_markdown(quote_text), quote_style))
         
         # 无序列表
-        elif line.startswith('- ') or line.startswith('* '):
-            text = line[2:].strip()
-            story.append(Paragraph(f"• {escape_html(text)}", body_style))
+        elif stripped.startswith('- ') or stripped.startswith('* '):
+            text = stripped[2:].strip()
+            list_style = ParagraphStyle(
+                'ListItem',
+                parent=body_style,
+                leftIndent=20,
+                firstLineIndent=-15,
+                spaceBefore=3,
+                spaceAfter=3
+            )
+            list_items.append(Paragraph(f"• {process_inline_markdown(text)}", list_style))
+            in_list = True
         
         # 有序列表
-        elif re.match(r'^\d+\.\s', line):
-            text = re.sub(r'^\d+\.\s', '', line)
-            match = re.match(r'^(\d+)\.', line)
+        elif re.match(r'^\d+\.\s', stripped):
+            text = re.sub(r'^\d+\.\s', '', stripped)
+            match = re.match(r'^(\d+)\.', stripped)
             num = match.group(1) if match else '1'
-            story.append(Paragraph(f"{num}. {escape_html(text)}", body_style))
+            list_style = ParagraphStyle(
+                'OrderedListItem',
+                parent=body_style,
+                leftIndent=25,
+                firstLineIndent=-20,
+                spaceBefore=3,
+                spaceAfter=3
+            )
+            list_items.append(Paragraph(f"{num}. {process_inline_markdown(text)}", list_style))
+            in_list = True
+        
+        # 水平分割线
+        elif stripped in ['---', '***', '___']:
+            flush_list()
+            from reportlab.platypus import HRFlowable
+            story.append(Spacer(1, 0.3*cm))
+            story.append(HRFlowable(width="100%", thickness=1, color=HexColor('#d1d5db')))
+            story.append(Spacer(1, 0.3*cm))
         
         # 普通段落
         else:
+            flush_list()
             # 处理粗体、斜体、行内代码
-            text = process_inline_markdown(line)
+            text = process_inline_markdown(stripped)
             story.append(Paragraph(text, body_style))
         
         i += 1
+    
+    # 处理最后可能剩余的列表项
+    flush_list()
     
     # 生成PDF
     doc.build(story)
@@ -290,19 +354,22 @@ def process_inline_markdown(text: str) -> str:
     # 转义HTML
     text = escape_html(text)
     
-    # 行内代码
-    text = re.sub(r'`([^`]+)`', r'<font face="Courier" color="#dc2626">\1</font>', text)
+    # 行内代码（先处理，避免被其他规则影响）
+    text = re.sub(r'`([^`]+)`', r'<font face="Courier" color="#dc2626" backColor="#f3f4f6">\1</font>', text)
     
-    # 粗体
-    text = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', text)
-    text = re.sub(r'__([^_]+)__', r'<b>\1</b>', text)
+    # 粗体（先处理双星号，再处理下划线）
+    text = re.sub(r'\*\*([^*]+?)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'__([^_]+?)__', r'<b>\1</b>', text)
     
-    # 斜体
-    text = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', text)
-    text = re.sub(r'_([^_]+)_', r'<i>\1</i>', text)
+    # 斜体（处理单星号和下划线，但不要匹配已处理的粗体）
+    text = re.sub(r'(?<!\*)\*(?!\*)([^*]+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
+    text = re.sub(r'(?<!_)_(?!_)([^_]+?)(?<!_)_(?!_)', r'<i>\1</i>', text)
     
     # 链接
-    text = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'<a href="\2">\1</a>', text)
+    text = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'<u><font color="#2563eb">\1</font></u>', text)
+    
+    # 删除线
+    text = re.sub(r'~~([^~]+?)~~', r'<strike>\1</strike>', text)
     
     return text
 
