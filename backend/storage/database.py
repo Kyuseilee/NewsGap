@@ -308,7 +308,10 @@ class Database(StorageInterface, CustomCategoryDB):
         industry: Optional[IndustryCategory] = None,
         enabled_only: bool = True
     ) -> List[Source]:
-        """获取信息源列表"""
+        """获取信息源列表
+        
+        对于 DAILY_INFO_GAP 分类，返回所有 metadata 中包含 daily_info_gap:true 的源
+        """
         query = "SELECT * FROM sources"
         params = []
         conditions = []
@@ -316,7 +319,11 @@ class Database(StorageInterface, CustomCategoryDB):
         if enabled_only:
             conditions.append("enabled = 1")
         
-        if industry:
+        # 特殊处理：daily_info_gap 通过 metadata 标签查询
+        if industry and industry == IndustryCategory.DAILY_INFO_GAP:
+            # 不添加 industry 条件，后面在 Python 层面过滤
+            pass
+        elif industry:
             conditions.append("industry = ?")
             params.append(industry.value)
         
@@ -329,7 +336,16 @@ class Database(StorageInterface, CustomCategoryDB):
             db.row_factory = aiosqlite.Row
             cursor = await db.execute(query, params)
             rows = await cursor.fetchall()
-            return [self._row_to_source(row) for row in rows]
+            sources = [self._row_to_source(row) for row in rows]
+        
+        # 特殊处理：过滤出带有 daily_info_gap 标签的源
+        if industry and industry == IndustryCategory.DAILY_INFO_GAP:
+            sources = [
+                s for s in sources 
+                if s.metadata and s.metadata.get('daily_info_gap') is True
+            ]
+        
+        return sources
     
     # ========================================================================
     # Analysis 操作

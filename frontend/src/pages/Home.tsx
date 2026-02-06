@@ -26,7 +26,7 @@ export default function HomePage() {
   // 分类模式：'industry' 或 'custom'
   const [categoryMode, setCategoryMode] = useState<'industry' | 'custom'>('industry')
   // 选择的行业分类（基于RSSHub分类）
-  const [industry, setIndustry] = useState('tech')
+  const [industry, setIndustry] = useState('daily_info_gap')
   // 选择的自定义分类ID
   const [customCategoryId, setCustomCategoryId] = useState<string>('')
   const [hours, setHours] = useState(24)
@@ -282,6 +282,7 @@ export default function HomePage() {
                 onChange={(e) => setIndustry(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
+                <option value="daily_info_gap">每日信息差（精选综合信息源）</option>
                 <option value="socialmedia">社交媒体（微博、知乎、即刻等）</option>
                 <option value="news">新闻资讯（传统媒体）</option>
                 <option value="tech">科技互联网（36氪、少数派、IT之家）</option>

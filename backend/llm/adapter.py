@@ -22,6 +22,7 @@ class BaseLLMAdapter(LLMAdapterInterface, ABC):
     
     # 行业中文名称映射
     INDUSTRY_NAME_MAP = {
+        "daily_info_gap": "每日信息差",
         "socialmedia": "社交媒体",
         "news": "新闻资讯",
         "tech": "科技互联网",
@@ -207,15 +208,33 @@ class BaseLLMAdapter(LLMAdapterInterface, ABC):
 - ✅ 每段话都要有"所以呢？"的答案
 """
         
-        return f"""{task_description}
-
-{articles_text}
-
+        # 获取品类特定的自定义指令
+        custom_instructions = prompt_manager.get_custom_instructions(industry)
+        
+        # 根据品类决定输出格式要求
+        if custom_instructions.get('no_markdown'):
+            # 播报稿件模式：不用 Markdown，不用引用
+            format_instructions = ""
+        elif custom_instructions.get('remove_citations'):
+            # 去除引用但保留 Markdown
+            format_instructions = """
+---
+**输出格式**：直接输出 Markdown 格式的报告，不要用代码块包裹。
+**质量标准**：信息密度 > 覆盖率，判断清晰 > 面面俱到。
+"""
+        else:
+            # 默认：Markdown + 引用
+            format_instructions = """
 ---
 **输出格式**：直接输出 Markdown 格式的报告，不要用代码块包裹。
 **质量标准**：信息密度 > 覆盖率，判断清晰 > 面面俱到。
 **引用要求**：提到具体事实、数据或观点时，必须用 `[数字]` 标注来源（如 `[1]`、`[2][3]`），数字对应上方信息源列表的编号。
 """
+        
+        return f"""{task_description}
+
+{articles_text}
+{format_instructions}"""
     
     @abstractmethod
     async def analyze(

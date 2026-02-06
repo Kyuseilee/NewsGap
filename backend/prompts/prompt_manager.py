@@ -23,6 +23,7 @@ class PromptManager:
         
         # 品类到文件名的映射
         self.industry_to_file = {
+            IndustryCategory.DAILY_INFO_GAP: "daily_info_gap.yaml",
             IndustryCategory.SOCIAL: "socialmedia.yaml",
             IndustryCategory.NEWS: "news.yaml",
             IndustryCategory.TECH: "tech.yaml",
@@ -49,7 +50,7 @@ class PromptManager:
         else:
             self._base_config = {}
     
-    @lru_cache(maxsize=13)  # 缓存所有品类的配置
+    @lru_cache(maxsize=14)  # 缓存所有品类的配置
     def _load_industry_config(self, industry: str) -> Dict[str, Any]:
         """加载特定品类的配置"""
         if industry not in self.industry_to_file:

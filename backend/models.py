@@ -31,6 +31,7 @@ class SourcePriority(str, Enum):
 
 class IndustryCategory(str, Enum):
     """行业分类 - 基于RSSHub路由体系"""
+    DAILY_INFO_GAP = "daily_info_gap"  # 每日信息差：精选综合信息源
     SOCIAL = "socialmedia"      # 社交媒体：微博、知乎、即刻、豆瓣等
     NEWS = "news"               # 新闻资讯：传统媒体、新闻网站
     TECH = "tech"               # 科技互联网：36氪、少数派、IT之家等

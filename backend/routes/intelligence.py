@@ -257,11 +257,16 @@ async def fetch_and_analyze(
     
     try:
         from models import AnalysisType
+        # 确定分析时使用的 industry
+        # 如果是自定义分类，则为 None（使用 custom_prompt）
+        # 如果是标准行业分类（包括 daily_info_gap），则传递原始请求的 industry
+        analysis_industry = None if request.custom_category_id else request.industry
+        
         analysis = await analyzer.analyze(
             articles=articles,
             analysis_type=AnalysisType.COMPREHENSIVE,
             custom_prompt=custom_prompt,  # 传递自定义提示词
-            industry=None  # 自定义分类时不使用industry
+            industry=analysis_industry  # 传递原始请求的 industry，避免自动推断导致分类错误
         )
         
         analysis_id = await db.save_analysis(analysis)

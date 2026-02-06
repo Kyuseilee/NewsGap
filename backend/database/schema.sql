@@ -180,6 +180,7 @@ CREATE INDEX IF NOT EXISTS idx_article_tags_tag ON article_tags(tag_name);
 CREATE TABLE IF NOT EXISTS analyses (
     id TEXT PRIMARY KEY,
     analysis_type TEXT NOT NULL,  -- 'trend', 'signal', 'gap', 'brief', 'comprehensive'
+    industry TEXT,  -- IndustryCategory enum value (可选，用于记录分析的行业分类)
     
     -- 分析结果（JSON 存储）
     executive_brief TEXT NOT NULL,
@@ -208,6 +209,7 @@ CREATE TABLE IF NOT EXISTS analyses (
 
 CREATE INDEX IF NOT EXISTS idx_analyses_created_at ON analyses(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_analyses_type ON analyses(analysis_type);
+CREATE INDEX IF NOT EXISTS idx_analyses_industry ON analyses(industry);
 CREATE INDEX IF NOT EXISTS idx_analyses_llm_backend ON analyses(llm_backend);
 CREATE INDEX IF NOT EXISTS idx_analyses_rating ON analyses(user_rating);
 
