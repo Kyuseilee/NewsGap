@@ -134,7 +134,7 @@ function ProxyConfigManager() {
     }
   }
 
-  const isConfigured = proxyConfig?.enabled && proxyConfig?.host
+  const isConfigured = proxyConfig?.enabled && (proxyConfig?.http || proxyConfig?.https || proxyConfig?.socks5)
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">

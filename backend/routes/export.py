@@ -264,18 +264,28 @@ def markdown_to_pdf_bytes(markdown_text: str, metadata: dict) -> BytesIO:
         # 代码块
         elif stripped.startswith('```'):
             flush_list()
+            # 检测代码块语言类型
+            code_lang = stripped[3:].strip().lower()
             code_lines = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith('```'):
                 code_lines.append(lines[i])
                 i += 1
             if code_lines:
-                code_text = '\n'.join(code_lines)
-                # 使用Preformatted保持格式
-                from reportlab.platypus import Preformatted
-                story.append(Spacer(1, 0.2*cm))
-                story.append(Preformatted(escape_html(code_text), code_style))
-                story.append(Spacer(1, 0.2*cm))
+                # 特殊处理 Mermaid 流程图：在 PDF 中显示提示信息而非乱码
+                if code_lang == 'mermaid':
+                    from reportlab.platypus import Preformatted
+                    story.append(Spacer(1, 0.2*cm))
+                    mermaid_notice = "[流程图] 此处为 Mermaid 流程图，请在网页版查看"
+                    story.append(Paragraph(mermaid_notice, quote_style))
+                    story.append(Spacer(1, 0.2*cm))
+                else:
+                    code_text = '\n'.join(code_lines)
+                    # 使用Preformatted保持格式
+                    from reportlab.platypus import Preformatted
+                    story.append(Spacer(1, 0.2*cm))
+                    story.append(Preformatted(escape_html(code_text), code_style))
+                    story.append(Spacer(1, 0.2*cm))
         
         # 引用块
         elif stripped.startswith('>'):

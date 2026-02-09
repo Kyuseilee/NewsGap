@@ -8,7 +8,6 @@ import logging
 import os
 from typing import List, Optional
 from datetime import datetime
-import google.generativeai as genai
 
 from models import Article, Analysis, AnalysisType, IndustryCategory, Trend, Signal, InformationGap
 from llm.adapter import BaseLLMAdapter
@@ -16,6 +15,17 @@ from llm.adapter import BaseLLMAdapter
 # 配置日志
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# 延迟导入的 genai 模块引用
+_genai = None
+
+def _get_genai():
+    """延迟导入 google.generativeai，确保代理环境变量已设置"""
+    global _genai
+    if _genai is None:
+        import google.generativeai as genai
+        _genai = genai
+    return _genai
 
 
 class GeminiAdapter(BaseLLMAdapter):
@@ -34,11 +44,17 @@ class GeminiAdapter(BaseLLMAdapter):
         if not self.api_key:
             raise ValueError("Gemini API Key is required. Please configure it in Settings.")
 
-        # 如果提供了代理，设置环境变量（google.generativeai通过httpx使用代理）
+        # 在导入 google.generativeai 之前设置代理环境变量
+        # 这是关键！httpx 在导入时会读取代理设置
         if self.proxy_url:
             os.environ['HTTP_PROXY'] = self.proxy_url
             os.environ['HTTPS_PROXY'] = self.proxy_url
+            os.environ['http_proxy'] = self.proxy_url
+            os.environ['https_proxy'] = self.proxy_url
             logger.info(f"Gemini 使用代理: {self.proxy_url}")
+        
+        # 延迟导入 genai 模块（此时代理环境变量已设置）
+        genai = _get_genai()
         
         # 配置 Google GenAI
         genai.configure(api_key=self.api_key)
