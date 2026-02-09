@@ -220,6 +220,7 @@ CREATE INDEX IF NOT EXISTS idx_analyses_rating ON analyses(user_rating);
 CREATE TABLE IF NOT EXISTS analysis_articles (
     analysis_id TEXT NOT NULL,
     article_id TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,  -- 文章在分析中的顺序位置，用于保持引用 [1][2] 的正确映射
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     PRIMARY KEY (analysis_id, article_id),

@@ -55,10 +55,11 @@ async def list_analyses(
         
         analyses = []
         for row in rows:
-            # 获取关联的文章ID
+            # 获取关联的文章ID（按 position 排序以保持引用顺序）
             article_cursor = await conn.execute("""
                 SELECT article_id FROM analysis_articles
                 WHERE analysis_id = ?
+                ORDER BY position ASC
             """, (row['id'],))
             article_rows = await article_cursor.fetchall()
             article_ids = [r['article_id'] for r in article_rows]

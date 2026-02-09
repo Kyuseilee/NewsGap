@@ -379,12 +379,12 @@ class Database(StorageInterface, CustomCategoryDB):
                 analysis.user_rating, analysis.user_notes
             ))
             
-            # 保存文章关联
-            for article_id in analysis.article_ids:
+            # 保存文章关联（保持顺序）
+            for position, article_id in enumerate(analysis.article_ids):
                 await db.execute("""
-                    INSERT OR IGNORE INTO analysis_articles (analysis_id, article_id)
-                    VALUES (?, ?)
-                """, (analysis.id, article_id))
+                    INSERT OR REPLACE INTO analysis_articles (analysis_id, article_id, position)
+                    VALUES (?, ?, ?)
+                """, (analysis.id, article_id, position))
             
             await db.commit()
         
@@ -403,9 +403,9 @@ class Database(StorageInterface, CustomCategoryDB):
             if not row:
                 return None
             
-            # 获取关联的文章 ID
+            # 获取关联的文章 ID（按 position 排序以保持引用顺序）
             article_cursor = await db.execute(
-                "SELECT article_id FROM analysis_articles WHERE analysis_id = ?",
+                "SELECT article_id FROM analysis_articles WHERE analysis_id = ? ORDER BY position ASC",
                 (analysis_id,)
             )
             article_ids = [r[0] for r in await article_cursor.fetchall()]
