@@ -199,6 +199,35 @@ class Analysis(BaseModel):
     user_notes: Optional[str] = None
 
 
+class TrendInsight(BaseModel):
+    """趋势洞察结果模型 - 独立存储，用于跨报告趋势分析"""
+    id: Optional[str] = None
+    
+    # 来源分析报告
+    source_analysis_ids: List[str] = Field(..., min_items=2)
+    
+    # 行业（从来源报告推断）
+    industry: Optional[IndustryCategory] = None
+    
+    # 时间范围
+    date_range_start: Optional[datetime] = None
+    date_range_end: Optional[datetime] = None
+    
+    # 分析结果
+    executive_summary: str  # 执行摘要
+    markdown_report: str    # 完整 Markdown 报告
+    
+    # 元数据
+    llm_backend: str
+    llm_model: Optional[str] = None
+    token_usage: Optional[int] = None
+    estimated_cost: Optional[float] = None
+    
+    # 时间信息
+    created_at: datetime = Field(default_factory=datetime.now)
+    processing_time_seconds: Optional[float] = None
+
+
 # ============================================================================
 # 模块接口定义（抽象基类）
 # ============================================================================

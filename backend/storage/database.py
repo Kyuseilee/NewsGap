@@ -14,7 +14,7 @@ from pathlib import Path
 from models import (
     Article, Source, Analysis, Tag,
     IndustryCategory, AnalysisType,
-    StorageInterface, CustomCategory
+    StorageInterface, CustomCategory, TrendInsight
 )
 from storage.custom_category_db import CustomCategoryDB
 
@@ -505,4 +505,134 @@ class Database(StorageInterface, CustomCategoryDB):
             processing_time_seconds=row['processing_time_seconds'],
             user_rating=row['user_rating'],
             user_notes=row['user_notes']
+        )
+
+    # ========================================================================
+    # TrendInsight 趋势洞察操作
+    # ========================================================================
+    
+    async def save_trend_insight(self, insight: TrendInsight) -> str:
+        """保存趋势洞察结果"""
+        if not insight.id:
+            insight.id = str(uuid.uuid4())
+        
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute("""
+                INSERT OR REPLACE INTO trend_insights (
+                    id, industry, date_range_start, date_range_end,
+                    executive_summary, markdown_report,
+                    llm_backend, llm_model, token_usage, estimated_cost,
+                    created_at, processing_time_seconds
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                insight.id,
+                insight.industry.value if insight.industry else None,
+                insight.date_range_start.isoformat() if insight.date_range_start else None,
+                insight.date_range_end.isoformat() if insight.date_range_end else None,
+                insight.executive_summary,
+                insight.markdown_report,
+                insight.llm_backend,
+                insight.llm_model,
+                insight.token_usage,
+                insight.estimated_cost,
+                insight.created_at.isoformat(),
+                insight.processing_time_seconds
+            ))
+            
+            # 保存来源分析报告关联（保持顺序）
+            for position, analysis_id in enumerate(insight.source_analysis_ids):
+                await db.execute("""
+                    INSERT OR REPLACE INTO trend_insight_sources (trend_insight_id, analysis_id, position)
+                    VALUES (?, ?, ?)
+                """, (insight.id, analysis_id, position))
+            
+            await db.commit()
+        
+        return insight.id
+    
+    async def get_trend_insight(self, insight_id: str) -> Optional[TrendInsight]:
+        """根据 ID 获取趋势洞察结果"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT * FROM trend_insights WHERE id = ?",
+                (insight_id,)
+            )
+            row = await cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            # 获取关联的分析报告 ID（按 position 排序）
+            source_cursor = await db.execute(
+                "SELECT analysis_id FROM trend_insight_sources WHERE trend_insight_id = ? ORDER BY position ASC",
+                (insight_id,)
+            )
+            source_ids = [r[0] for r in await source_cursor.fetchall()]
+            
+            return self._row_to_trend_insight(row, source_ids)
+    
+    async def get_trend_insights(
+        self,
+        industry: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> List[TrendInsight]:
+        """获取趋势洞察列表"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            
+            if industry and industry != 'all':
+                cursor = await db.execute("""
+                    SELECT * FROM trend_insights 
+                    WHERE industry = ?
+                    ORDER BY created_at DESC
+                    LIMIT ? OFFSET ?
+                """, (industry, limit, offset))
+            else:
+                cursor = await db.execute("""
+                    SELECT * FROM trend_insights 
+                    ORDER BY created_at DESC
+                    LIMIT ? OFFSET ?
+                """, (limit, offset))
+            
+            rows = await cursor.fetchall()
+            
+            insights = []
+            for row in rows:
+                # 获取关联的分析报告 ID
+                source_cursor = await db.execute(
+                    "SELECT analysis_id FROM trend_insight_sources WHERE trend_insight_id = ? ORDER BY position ASC",
+                    (row['id'],)
+                )
+                source_ids = [r[0] for r in await source_cursor.fetchall()]
+                
+                insight = self._row_to_trend_insight(row, source_ids)
+                insights.append(insight)
+            
+            return insights
+    
+    def _row_to_trend_insight(self, row: aiosqlite.Row, source_analysis_ids: List[str]) -> TrendInsight:
+        """将数据库行转换为 TrendInsight 对象"""
+        industry = None
+        if row['industry']:
+            try:
+                industry = IndustryCategory(row['industry'])
+            except (ValueError, KeyError):
+                industry = IndustryCategory.OTHER
+        
+        return TrendInsight(
+            id=row['id'],
+            source_analysis_ids=source_analysis_ids,
+            industry=industry,
+            date_range_start=datetime.fromisoformat(row['date_range_start']) if row['date_range_start'] else None,
+            date_range_end=datetime.fromisoformat(row['date_range_end']) if row['date_range_end'] else None,
+            executive_summary=row['executive_summary'],
+            markdown_report=row['markdown_report'],
+            llm_backend=row['llm_backend'],
+            llm_model=row['llm_model'],
+            token_usage=row['token_usage'],
+            estimated_cost=row['estimated_cost'],
+            created_at=datetime.fromisoformat(row['created_at']),
+            processing_time_seconds=row['processing_time_seconds']
         )

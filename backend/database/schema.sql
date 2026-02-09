@@ -233,6 +233,45 @@ CREATE INDEX IF NOT EXISTS idx_analysis_articles_article ON analysis_articles(ar
 
 
 -- ============================================================================
+-- 趋势洞察表（跨报告趋势分析）
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS trend_insights (
+    id TEXT PRIMARY KEY,
+    industry TEXT,
+    date_range_start TIMESTAMP,
+    date_range_end TIMESTAMP,
+    executive_summary TEXT NOT NULL,
+    markdown_report TEXT NOT NULL,
+    llm_backend TEXT NOT NULL,
+    llm_model TEXT,
+    token_usage INTEGER,
+    estimated_cost REAL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processing_time_seconds REAL
+);
+
+CREATE INDEX IF NOT EXISTS idx_trend_insights_industry ON trend_insights(industry);
+CREATE INDEX IF NOT EXISTS idx_trend_insights_created ON trend_insights(created_at DESC);
+
+
+-- ============================================================================
+-- 趋势洞察-分析报告关联表（多对多）
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS trend_insight_sources (
+    trend_insight_id TEXT NOT NULL,
+    analysis_id TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,  -- 保持报告顺序
+    
+    PRIMARY KEY (trend_insight_id, analysis_id),
+    FOREIGN KEY (trend_insight_id) REFERENCES trend_insights(id) ON DELETE CASCADE,
+    FOREIGN KEY (analysis_id) REFERENCES analyses(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_trend_insight_sources_insight ON trend_insight_sources(trend_insight_id);
+CREATE INDEX IF NOT EXISTS idx_trend_insight_sources_analysis ON trend_insight_sources(analysis_id);
+
+
+-- ============================================================================
 -- 配置表（键值对存储）
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS config (

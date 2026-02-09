@@ -219,4 +219,26 @@ export const api = {
     })
     return data
   },
+
+  // 趋势洞察相关
+  createTrendInsight: async (params: {
+    analysis_ids: string[]
+    llm_backend: string
+    llm_model?: string
+  }): Promise<any> => {
+    const { data } = await client.post('/api/trend-insight', params)
+    return data
+  },
+
+  getTrendInsights: async (industry?: string): Promise<any[]> => {
+    const { data } = await client.get('/api/trend-insights', { 
+      params: industry ? { industry } : undefined 
+    })
+    return data
+  },
+
+  getTrendInsight: async (id: string): Promise<any> => {
+    const { data } = await client.get(`/api/trend-insights/${id}`)
+    return data
+  },
 }

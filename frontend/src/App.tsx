@@ -1,11 +1,14 @@
 import { Routes, Route, Link } from 'react-router-dom'
-import { Home, FileText, TrendingUp, Archive, Settings } from 'lucide-react'
+import { Home, FileText, TrendingUp, Archive, Settings, LineChart } from 'lucide-react'
 import HomePage from './pages/Home'
 import ArticlesPage from './pages/Articles'
 import AnalysisPage from './pages/Analysis'
 import AnalysisList from './pages/AnalysisList'
 import ArchivePage from './pages/Archive'
 import SettingsPage from './pages/Settings'
+import TrendInsightPage from './pages/TrendInsight'
+import TrendInsightList from './pages/TrendInsightList'
+import TrendInsightDetail from './pages/TrendInsightDetail'
 
 function App() {
   return (
@@ -22,6 +25,7 @@ function App() {
             <NavLink to="/" icon={<Home size={20} />} label="首页" />
             <NavLink to="/articles" icon={<FileText size={20} />} label="文章列表" />
             <NavLink to="/analysis" icon={<TrendingUp size={20} />} label="分析结果" />
+            <NavLink to="/trend-insight" icon={<LineChart size={20} />} label="趋势洞察" />
             <NavLink to="/archive" icon={<Archive size={20} />} label="归档管理" />
             <NavLink to="/settings" icon={<Settings size={20} />} label="设置" />
           </nav>
@@ -39,6 +43,9 @@ function App() {
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/analysis" element={<AnalysisList />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
+          <Route path="/trend-insight" element={<TrendInsightPage />} />
+          <Route path="/trend-insight/history" element={<TrendInsightList />} />
+          <Route path="/trend-insight/:id" element={<TrendInsightDetail />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
