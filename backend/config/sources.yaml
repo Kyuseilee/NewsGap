@@ -85,6 +85,104 @@ official_rss:
   enabled: true
   metadata:
     daily_info_gap: true
+- name: TechCrunch
+  url: https://techcrunch.com/feed/
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 全球顶级科技创业媒体
+    daily_info_gap: true
+- name: The Verge
+  url: https://www.theverge.com/rss/index.xml
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 科技产品与数字文化评测
+- name: Wired
+  url: https://www.wired.com/feed/rss
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 科技、科学与文化深度报道
+- name: 钛媒体
+  url: https://www.tmtpost.com/feed
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 国内科技财经商业深度媒体
+    daily_info_gap: true
+- name: 奇客Solidot
+  url: https://www.solidot.org/index.rss
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 面向开源社区的科技资讯，运营多年
+- name: 人人都是产品经理
+  url: https://www.woshipm.com/feed
+  type: rss
+  priority: official_rss
+  industry: tech
+  enabled: true
+  metadata:
+    description: 产品经理与运营社区
+- name: 美团技术团队
+  url: https://tech.meituan.com/feed
+  type: rss
+  priority: official_rss
+  industry: developer
+  enabled: true
+  metadata:
+    description: 高质量工程实践文章，订阅人数排名前列
+- name: 月光博客
+  url: http://feed.williamlong.info/
+  type: rss
+  priority: official_rss
+  industry: developer
+  enabled: true
+  metadata:
+    description: 国内最知名的独立科技博客之一
+- name: FreeBuf
+  url: https://www.freebuf.com/feed
+  type: rss
+  priority: official_rss
+  industry: developer
+  enabled: true
+  metadata:
+    description: 国内领先网络安全媒体
+- name: web.dev
+  url: https://web.dev/feed.xml
+  type: rss
+  priority: official_rss
+  industry: developer
+  enabled: true
+  metadata:
+    description: Google官方Web开发指南与最佳实践
+- name: 机核
+  url: https://www.gcores.com/rss
+  type: rss
+  priority: official_rss
+  industry: gaming
+  enabled: true
+  metadata:
+    description: 游戏与文化深度内容社区，口碑极佳
+- name: 触乐
+  url: http://www.chuapp.com/feed
+  type: rss
+  priority: official_rss
+  industry: gaming
+  enabled: true
+  metadata:
+    description: 高质量游戏新闻与评测
 finance:
 - name: 财联社电报
   url: http://localhost:1200/cls/telegraph
@@ -1543,6 +1641,95 @@ general:
   enabled: true
   metadata:
     description: 马蜂窝游记
+- name: 煎蛋热榜
+  url: http://localhost:1200/jandan/top
+  type: rss
+  priority: rsshub_stable
+  industry: socialmedia
+  enabled: true
+  metadata:
+    description: 老牌中文趣味内容社区热榜
+- name: 抽屉新热榜
+  url: http://localhost:1200/chouti/top/168
+  type: rss
+  priority: rsshub_stable
+  industry: socialmedia
+  enabled: true
+  metadata:
+    description: 168小时热门内容聚合
+- name: Product Hunt每日
+  url: http://localhost:1200/producthunt/today
+  type: rss
+  priority: rsshub_stable
+  industry: tech
+  enabled: true
+  metadata:
+    description: 全球新产品发现平台
+    daily_info_gap: true
+- name: InfoQ推荐
+  url: http://localhost:1200/infoq/recommend
+  type: rss
+  priority: rsshub_stable
+  industry: developer
+  enabled: true
+  metadata:
+    description: 企业级技术媒体推荐内容
+- name: Readhub热门话题
+  url: http://localhost:1200/readhub
+  type: rss
+  priority: rsshub_stable
+  industry: tech
+  enabled: true
+  metadata:
+    description: 科技新闻聚合器
+- name: cnBeta
+  url: http://localhost:1200/cnbeta
+  type: rss
+  priority: rsshub_stable
+  industry: tech
+  enabled: true
+  metadata:
+    description: 中文IT资讯站
+- name: 果壳网科学人
+  url: http://localhost:1200/guokr/scientific
+  type: rss
+  priority: rsshub_stable
+  industry: tech
+  enabled: true
+  metadata:
+    description: 科学松鼠会旗下科普平台
+- name: 豆瓣最受欢迎书评
+  url: https://www.douban.com/feed/review/book
+  type: rss
+  priority: official_rss
+  industry: entertainment
+  enabled: true
+  metadata:
+    description: 豆瓣读书热门书评
+- name: 界面新闻-商业
+  url: http://localhost:1200/jiemian/list/4
+  type: rss
+  priority: rsshub_stable
+  industry: finance
+  enabled: true
+  metadata:
+    description: 界面新闻商业频道
+- name: 猎云网
+  url: http://localhost:1200/lieyunwang
+  type: rss
+  priority: rsshub_stable
+  industry: finance
+  enabled: true
+  metadata:
+    description: 创投与创业媒体
+- name: 经济观察报
+  url: http://localhost:1200/eeo/yaowen
+  type: rss
+  priority: rsshub_stable
+  industry: finance
+  enabled: true
+  metadata:
+    description: 综合财经媒体要闻
 high_risk:
 - name: 新华社
   url: https://rsshub.app/xinhuanet/news
