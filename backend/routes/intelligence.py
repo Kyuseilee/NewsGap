@@ -26,9 +26,20 @@ async def get_db():
     return db
 
 
-async def get_crawler():
-    """依赖注入：爬虫"""
-    return CrawlerService()
+async def get_crawler(db: Database = Depends(get_db)):
+    """依赖注入：爬虫（带代理配置）"""
+    config_mgr = ConfigManager(db)
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+    if proxy_config and proxy_config.get('enabled'):
+        formatted_config = {
+            'enabled': True,
+            'http': proxy_config.get('http'),
+            'https': proxy_config.get('https'),
+            'socks5': proxy_config.get('socks5')
+        }
+        return CrawlerService(proxy_config=formatted_config)
+    else:
+        return CrawlerService()
 
 
 async def get_config_manager(db: Database = Depends(get_db)):
@@ -249,10 +260,14 @@ async def fetch_and_analyze(
             detail=f"使用 {request.llm_backend.upper()} 需要先在设置页面配置 API Key"
         )
     
+    # 获取代理配置
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+
     analyzer = Analyzer(
         llm_backend=request.llm_backend,
         api_key=api_key,
-        model=request.llm_model  # 传递用户选择的模型
+        model=request.llm_model,
+        proxy_config=proxy_config
     )
     
     try:

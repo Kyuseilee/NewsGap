@@ -7,11 +7,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import List, Optional
 from pydantic import BaseModel
+import httpx
+import time
+import logging
 
 from models import Source, IndustryCategory, SourceType
 from storage.database import Database
 from config_manager import ConfigManager
 from crawler.rsshub_helper import get_rsshub_helper, RSSHubHelper
+from utils.proxy_helper import ProxyHelper
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -44,15 +50,28 @@ async def get_sources(
 @router.post("/sources", response_model=Source)
 async def create_source(
     source: Source,
-    db: Database = Depends(get_db)
+    db: Database = Depends(get_db),
+    config_mgr: ConfigManager = Depends(get_config_manager)
 ):
     """
     创建新的信息源
     """
     from crawler.service import CrawlerService
     
+    # 获取代理配置用于验证信息源
+    proxy_config = await config_mgr.get_detailed_proxy_config()
+    if proxy_config and proxy_config.get('enabled'):
+        formatted_config = {
+            'enabled': True,
+            'http': proxy_config.get('http'),
+            'https': proxy_config.get('https'),
+            'socks5': proxy_config.get('socks5')
+        }
+        crawler = CrawlerService(proxy_config=formatted_config)
+    else:
+        crawler = CrawlerService()
+    
     # 验证信息源是否可访问
-    crawler = CrawlerService()
     is_valid = await crawler.validate_source(source)
     
     if not is_valid:
@@ -337,5 +356,115 @@ async def delete_proxy_config(
     return {
         'success': True,
         'message': '代理配置已禁用'
+    }
+
+
+@router.post("/proxy/test")
+async def test_proxy_config(
+    request: ProxyConfigRequest,
+):
+    """测试代理连接
+
+    使用提供的代理配置尝试访问多个测试目标，返回连通性结果。
+    支持测试尚未保存的配置（用于保存前预检）。
+    """
+    if not request.enabled:
+        raise HTTPException(status_code=400, detail="请先启用代理再进行测试")
+
+    if not (request.http_proxy or request.https_proxy or request.socks5_proxy):
+        raise HTTPException(status_code=400, detail="请至少配置一个代理地址")
+
+    # 构建 ProxyHelper 所需的配置格式
+    proxy_config = {
+        'enabled': True,
+        'http': request.http_proxy or None,
+        'https': request.https_proxy or None,
+        'socks5': request.socks5_proxy or None,
+    }
+    httpx_proxies = ProxyHelper.convert_to_httpx_proxies(proxy_config)
+
+    if not httpx_proxies:
+        raise HTTPException(status_code=400, detail="代理地址格式无效，请检查")
+
+    # 测试目标：包含国内可达和需要代理才能达的目标
+    test_targets = [
+        {
+            'name': 'httpbin.org',
+            'url': 'https://httpbin.org/ip',
+            'description': '通用连通性测试',
+        },
+        {
+            'name': 'Google',
+            'url': 'https://www.google.com/generate_204',
+            'description': '外网可达性测试',
+        },
+        {
+            'name': 'GitHub',
+            'url': 'https://api.github.com',
+            'description': 'GitHub API 连通性',
+        },
+    ]
+
+    results = []
+    overall_success = False
+
+    for target in test_targets:
+        result = {
+            'name': target['name'],
+            'url': target['url'],
+            'description': target['description'],
+            'success': False,
+            'latency_ms': None,
+            'status_code': None,
+            'error': None,
+            'proxy_ip': None,
+        }
+
+        try:
+            start = time.time()
+            async with httpx.AsyncClient(
+                proxies=httpx_proxies,
+                timeout=10,
+                verify=False,
+                follow_redirects=True,
+            ) as client:
+                response = await client.get(target['url'])
+                latency = (time.time() - start) * 1000
+
+                result['success'] = response.status_code < 400
+                result['latency_ms'] = round(latency)
+                result['status_code'] = response.status_code
+
+                # 尝试从 httpbin 获取出口 IP
+                if target['name'] == 'httpbin.org' and response.status_code == 200:
+                    try:
+                        body = response.json()
+                        result['proxy_ip'] = body.get('origin')
+                    except Exception:
+                        pass
+
+                if result['success']:
+                    overall_success = True
+
+        except httpx.ProxyError as e:
+            result['error'] = f'代理连接失败: {str(e)}'
+            logger.warning(f"代理测试 ProxyError ({target['name']}): {e}")
+        except httpx.ConnectError as e:
+            result['error'] = f'无法连接代理服务器，请检查代理地址和端口: {str(e)}'
+            logger.warning(f"代理测试 ConnectError ({target['name']}): {e}")
+        except httpx.TimeoutException:
+            result['error'] = '连接超时 (10秒)，代理可能不可用'
+            logger.warning(f"代理测试超时 ({target['name']})")
+        except Exception as e:
+            result['error'] = f'测试失败: {str(e)}'
+            logger.warning(f"代理测试异常 ({target['name']}): {e}")
+
+        results.append(result)
+
+    return {
+        'success': overall_success,
+        'message': '代理连接正常' if overall_success else '代理连接失败，请检查代理配置',
+        'proxy_config_used': httpx_proxies,
+        'results': results,
     }
 

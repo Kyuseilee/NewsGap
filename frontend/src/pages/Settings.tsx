@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Key, Eye, EyeOff, Check, X, Edit, Trash2, Globe } from 'lucide-react'
+import { Key, Eye, EyeOff, Check, X, Edit, Trash2, Globe, Wifi, Loader2 } from 'lucide-react'
 import { api } from '@/services/api'
 import SourceManager from '@/components/SourceManager'
 import { CustomCategoryManager } from '@/components/CustomCategoryManager'
@@ -73,6 +73,8 @@ function ProxyConfigManager() {
     https_proxy: '',
     socks5_proxy: '',
   })
+  const [testResult, setTestResult] = useState<any>(null)
+  const [isTesting, setIsTesting] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: proxyConfig } = useQuery({
@@ -85,6 +87,7 @@ function ProxyConfigManager() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['proxy-config'] })
       setIsEditing(false)
+      setTestResult(null)
       alert(data.message || '代理配置已保存')
     },
     onError: (error: any) => {
@@ -96,6 +99,7 @@ function ProxyConfigManager() {
     mutationFn: () => api.deleteProxyConfig(),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['proxy-config'] })
+      setTestResult(null)
       alert(data.message || '代理配置已禁用')
     },
   })
@@ -108,6 +112,7 @@ function ProxyConfigManager() {
       socks5_proxy: proxyConfig?.socks5 || '',
     })
     setIsEditing(true)
+    setTestResult(null)
   }
 
   const handleSave = () => {
@@ -120,6 +125,7 @@ function ProxyConfigManager() {
 
   const handleCancel = () => {
     setIsEditing(false)
+    setTestResult(null)
     setConfig({
       enabled: false,
       http_proxy: '',
@@ -134,6 +140,33 @@ function ProxyConfigManager() {
     }
   }
 
+  const handleTest = async (testConfig?: typeof config) => {
+    const configToTest = testConfig || config
+    if (!configToTest.http_proxy && !configToTest.https_proxy && !configToTest.socks5_proxy) {
+      alert('请至少填写一个代理地址后再测试')
+      return
+    }
+    setIsTesting(true)
+    setTestResult(null)
+    try {
+      const result = await api.testProxyConfig({
+        enabled: true,
+        http_proxy: configToTest.http_proxy,
+        https_proxy: configToTest.https_proxy,
+        socks5_proxy: configToTest.socks5_proxy,
+      })
+      setTestResult(result)
+    } catch (error: any) {
+      setTestResult({
+        success: false,
+        message: error.response?.data?.detail || '测试请求失败，请检查后端服务',
+        results: [],
+      })
+    } finally {
+      setIsTesting(false)
+    }
+  }
+
   const isConfigured = proxyConfig?.enabled && (proxyConfig?.http || proxyConfig?.https || proxyConfig?.socks5)
 
   return (
@@ -142,7 +175,7 @@ function ProxyConfigManager() {
         <div className="flex items-center gap-3">
           <Globe size={24} className="text-gray-400" />
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">独立代理配置</h3>
+            <h3 className="text-lg font-semibold text-gray-900">网络代理配置</h3>
             <p className="text-sm text-gray-600 mt-1">
               配置网络代理以访问RSS源和AI API（适用于受限网络环境）
             </p>
@@ -181,7 +214,7 @@ function ProxyConfigManager() {
                     type="text"
                     value={config.http_proxy}
                     onChange={(e) => setConfig({ ...config, http_proxy: e.target.value })}
-                    placeholder="例如: http://127.0.0.1:8080"
+                    placeholder="例如: http://127.0.0.1:7897"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -193,7 +226,7 @@ function ProxyConfigManager() {
                     type="text"
                     value={config.https_proxy}
                     onChange={(e) => setConfig({ ...config, https_proxy: e.target.value })}
-                    placeholder="例如: https://127.0.0.1:8080"
+                    placeholder="留空则复用 HTTP 代理"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -222,6 +255,16 @@ function ProxyConfigManager() {
               <Check size={16} />
               保存
             </button>
+            {config.enabled && (
+              <button
+                onClick={() => handleTest()}
+                disabled={isTesting}
+                className="flex items-center gap-1 px-4 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+              >
+                {isTesting ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
+                {isTesting ? '测试中...' : '测试连接'}
+              </button>
+            )}
             <button
               onClick={handleCancel}
               className="flex items-center gap-1 px-4 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
@@ -266,6 +309,19 @@ function ProxyConfigManager() {
                   修改
                 </button>
                 <button
+                  onClick={() => handleTest({
+                    enabled: true,
+                    http_proxy: proxyConfig?.http || '',
+                    https_proxy: proxyConfig?.https || '',
+                    socks5_proxy: proxyConfig?.socks5 || '',
+                  })}
+                  disabled={isTesting}
+                  className="flex items-center gap-1 px-4 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+                >
+                  {isTesting ? <Loader2 size={16} className="animate-spin" /> : <Wifi size={16} />}
+                  {isTesting ? '测试中...' : '测试连接'}
+                </button>
+                <button
                   onClick={handleDisable}
                   className="flex items-center gap-1 px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                 >
@@ -288,10 +344,62 @@ function ProxyConfigManager() {
         </div>
       )}
 
+      {/* 代理测试结果 */}
+      {testResult && (
+        <div className={`mt-4 rounded-lg border p-4 ${
+          testResult.success
+            ? 'bg-green-50 border-green-200'
+            : 'bg-red-50 border-red-200'
+        }`}>
+          <div className="flex items-center gap-2 mb-3">
+            <Wifi size={18} className={testResult.success ? 'text-green-600' : 'text-red-600'} />
+            <span className={`font-medium text-sm ${
+              testResult.success ? 'text-green-800' : 'text-red-800'
+            }`}>
+              {testResult.message}
+            </span>
+          </div>
+          {testResult.results && testResult.results.length > 0 && (
+            <div className="space-y-2">
+              {testResult.results.map((r: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-sm bg-white rounded px-3 py-2 border border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block w-2 h-2 rounded-full ${
+                      r.success ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
+                    <span className="font-medium text-gray-800">{r.name}</span>
+                    <span className="text-gray-400 text-xs">{r.description}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs">
+                    {r.proxy_ip && (
+                      <span className="text-gray-500">
+                        出口IP: <span className="font-mono text-gray-700">{r.proxy_ip}</span>
+                      </span>
+                    )}
+                    {r.latency_ms != null && (
+                      <span className={`font-mono ${
+                        r.latency_ms < 1000 ? 'text-green-600' : r.latency_ms < 3000 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {r.latency_ms}ms
+                      </span>
+                    )}
+                    {r.error && (
+                      <span className="text-red-600 max-w-xs truncate" title={r.error}>
+                        {r.error}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
           <strong>提示</strong>：配置代理后，所有RSS拉取和AI API调用都将通过代理服务器。
-          支持独立配置HTTP、HTTPS和SOCKS5代理。常见代理工具：Clash (7890端口)、V2Ray等。
+          Clash 用户通常只需填写 HTTP 代理（如 http://127.0.0.1:7897），HTTPS 会自动复用。
         </p>
       </div>
     </div>

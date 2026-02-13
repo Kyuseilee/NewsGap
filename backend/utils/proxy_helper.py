@@ -127,6 +127,12 @@ class ProxyHelper:
             if 'https://' not in proxies:
                 proxies['https://'] = socks5_proxy
         
+        # 关键：如果只配置了 HTTP 代理但没有 HTTPS 代理，
+        # 将 HTTP 代理也用于 HTTPS 请求（Clash 等代理工具的 HTTP 端口通常同时处理 HTTPS）
+        if 'http://' in proxies and 'https://' not in proxies:
+            proxies['https://'] = proxies['http://']
+            logger.debug(f"HTTPS 代理未配置，复用 HTTP 代理: {proxies['http://']}")
+        
         if proxies:
             logger.debug(f"httpx 代理配置: {proxies}")
             return proxies

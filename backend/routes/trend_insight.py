@@ -252,21 +252,36 @@ async def create_trend_insight(
             token_usage = 0
             if hasattr(response, 'usage_metadata') and hasattr(response.usage_metadata, 'total_token_count'):
                 token_usage = response.usage_metadata.total_token_count
-        else:
-            # OpenAI/DeepSeek 使用 chat completions
-            from openai import OpenAI
-            
-            if request.llm_backend == 'deepseek':
-                client = OpenAI(
-                    api_key=api_key,
-                    base_url="https://api.deepseek.com/v1"
+        elif request.llm_backend == 'ollama':
+            # Ollama 使用 HTTP API
+            import httpx
+            proxies = None
+            if adapter.proxy_url:
+                proxies = {
+                    'http://': adapter.proxy_url,
+                    'https://': adapter.proxy_url,
+                }
+            async with httpx.AsyncClient(timeout=300, proxies=proxies) as http_client:
+                resp = await http_client.post(
+                    f"{adapter.base_url}/api/generate",
+                    json={
+                        "model": request.llm_model or "llama3.1",
+                        "prompt": f"{system_prompt}\n\n{user_prompt}",
+                        "stream": False,
+                        "options": {"num_predict": 32000}
+                    }
                 )
-                model = request.llm_model or "deepseek-chat"
-            else:
-                client = OpenAI(api_key=api_key)
-                model = request.llm_model or "gpt-4o-mini"
+                resp.raise_for_status()
+                result = resp.json()
+            response_text = result.get('response', '')
+            token_usage = result.get('eval_count', 0)
+        else:
+            # OpenAI/DeepSeek: 使用 adapter 中已配置好代理的客户端
+            model = request.llm_model
+            if not model:
+                model = "deepseek-chat" if request.llm_backend == 'deepseek' else "gpt-4o-mini"
             
-            response = client.chat.completions.create(
+            response = await adapter.client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},

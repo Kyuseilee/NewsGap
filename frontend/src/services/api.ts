@@ -199,11 +199,21 @@ export const api = {
 
   setProxyConfig: async (config: {
     enabled: boolean
-    host: string
-    port: number
-    protocol: string
+    http_proxy: string
+    https_proxy: string
+    socks5_proxy: string
   }): Promise<any> => {
     const { data } = await client.post('/api/config/proxy', config)
+    return data
+  },
+
+  testProxyConfig: async (config: {
+    enabled: boolean
+    http_proxy: string
+    https_proxy: string
+    socks5_proxy: string
+  }): Promise<any> => {
+    const { data } = await client.post('/api/config/proxy/test', config)
     return data
   },
 

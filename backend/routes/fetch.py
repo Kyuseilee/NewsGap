@@ -30,8 +30,9 @@ async def get_crawler(db: Database = Depends(get_db)):
     config_mgr = ConfigManager(db)
     proxy_config = await config_mgr.get_detailed_proxy_config()
     if proxy_config and proxy_config.get('enabled'):
-        # Convert to the format expected by CrawlerService
+        # 必须保留 enabled 字段，否则 ProxyHelper.convert_to_httpx_proxies 会忽略代理
         formatted_config = {
+            'enabled': True,
             'http': proxy_config.get('http'),
             'https': proxy_config.get('https'),
             'socks5': proxy_config.get('socks5')
